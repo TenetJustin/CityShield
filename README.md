@@ -20,6 +20,7 @@ It implements a transparent **Detect → Decide → Respond** loop:
 - The backend and demo can run on IBM LinuxONE with the included UBI container definition.
 - Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.
 - What-if runs share the frozen baseline evidence snapshot and return a paired simulation ID.
+- The console has an interactive 3D synthetic terrain, animated forecast timeline, four risk bands and a guided Understand → Test → Review workflow.
 - The remaining blockers are deliberately city-specific: selecting the city, replacing the synthetic grid, and mapping authoritative local data.
 
 ## Run locally
@@ -74,6 +75,7 @@ The automated suite covers temporal visibility, ingestion idempotency, determini
 - [Real-data integration runbook](docs/REAL_DATA_INTEGRATION.md)
 - [Datathon demo script](docs/DEMO_SCRIPT.md)
 - [Submission checklist](docs/SUBMISSION.md)
+- [Front-end functions and layout](docs/FRONTEND_EXPERIENCE.md)
 - [Security notes](docs/SECURITY.md)
 
 ## Acknowledgement

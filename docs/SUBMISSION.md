@@ -13,7 +13,7 @@
 - [x] Hash-chained audit verification.
 - [x] Generic FIRMS, NWS and WFIGS adapter code.
 - [x] LinuxONE OCI container, health check and deployment guide.
-- [x] Responsive decision console, automated tests and CI.
+- [x] Responsive guided decision console, interactive 3D demonstration, animated risk timeline, automated tests and CI.
 - [x] Model card, data contract, security notes and demo script.
 
 ## Blocked only by city selection

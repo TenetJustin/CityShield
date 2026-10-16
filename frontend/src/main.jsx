@@ -1,8 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
+const WildfireScene = lazy(() => import("./WildfireScene.jsx"));
+
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const HORIZONS = [30, 60, 120];
+const SCENARIOS = [
+  { id: "baseline", title: "Current outlook", detail: "No changed assumptions", payload: { name: "baseline" } },
+  { id: "wind_shift", title: "Wind turns", detail: "Direction +90°, speed ×1.4", payload: { name: "wind_shift", wind_speed_multiplier: 1.4, wind_direction_delta_deg: 90 } },
+  { id: "dry_gust", title: "Dry gust", detail: "Drier air, speed ×1.7", payload: { name: "dry_gust", wind_speed_multiplier: 1.7, humidity_delta_pct: -10 } },
+  { id: "suppression_support", title: "More suppression", detail: "Illustrative 35% effect", payload: { name: "suppression_support", suppression_effectiveness: 0.35 } },
+];
 
 async function api(path, options = {}) {
   const response = await fetch(`${API}${path}`, {
@@ -14,116 +23,148 @@ async function api(path, options = {}) {
   return payload;
 }
 
-const SCENARIOS = {
-  baseline: { name: "baseline" },
-  wind_shift: { name: "wind_shift", wind_speed_multiplier: 1.4, wind_direction_delta_deg: 90 },
-  dry_gust: { name: "dry_gust", wind_speed_multiplier: 1.7, humidity_delta_pct: -10 },
-  suppression_support: { name: "suppression_support", suppression_effectiveness: 0.35 },
-};
+const riskAt = (cell, horizon) => cell?.series?.find((point) => point.horizon_minutes === horizon)?.p90 ?? 0;
+const riskLevel = (value) => value >= 0.6 ? "High" : value >= 0.3 ? "Elevated" : value >= 0.1 ? "Watch" : "Low";
+const formatArea = (value) => value < 1 ? `${Math.round(value * 100)} ha` : `${value.toFixed(2)} km²`;
 
 function App() {
   const [result, setResult] = useState(null);
   const [forecast, setForecast] = useState(null);
+  const [worldState, setWorldState] = useState(null);
   const [decision, setDecision] = useState(null);
+  const [simulation, setSimulation] = useState(null);
   const [readiness, setReadiness] = useState(null);
+  const [city, setCity] = useState(null);
   const [sources, setSources] = useState([]);
   const [metrics, setMetrics] = useState(null);
   const [audits, setAudits] = useState([]);
-  const [horizon, setHorizon] = useState(120);
+  const [horizon, setHorizon] = useState(30);
   const [scenario, setScenario] = useState("baseline");
+  const [activeStep, setActiveStep] = useState("situation");
+  const [selectedCell, setSelectedCell] = useState(null);
   const [streamCount, setStreamCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("Ready for synthetic replay");
+  const [playing, setPlaying] = useState(false);
+  const [resetSignal, setResetSignal] = useState(0);
+  const [message, setMessage] = useState("Loading the demonstration");
   const [error, setError] = useState("");
   const [rsiCandidate, setRsiCandidate] = useState(null);
+  const eventSource = useRef(null);
 
   async function refreshSystem() {
-    const [ready, sourceData, metricData, auditData] = await Promise.all([
-      api("/api/v1/readiness"),
-      api("/api/v1/sources"),
-      api("/api/v1/metrics"),
-      api("/api/v1/audits?limit=20"),
+    const [ready, cityData, stateData, sourceData, metricData, auditData] = await Promise.all([
+      api("/api/v1/readiness"), api("/api/v1/city"), api("/api/v1/state"),
+      api("/api/v1/sources"), api("/api/v1/metrics"), api("/api/v1/audits?limit=20"),
     ]);
     setReadiness(ready);
+    setCity(cityData);
+    setWorldState(stateData);
     setSources(sourceData.sources);
     setMetrics(metricData);
-    setAudits(auditData.records.reverse());
+    setAudits([...auditData.records].reverse());
+  }
+
+  function receiveCompleted(data, count) {
+    setResult(data);
+    setForecast(data.forecast);
+    setDecision(data.decision);
+    setSimulation(null);
+    setScenario("baseline");
+    setHorizon(30);
+    setStreamCount(count);
+    setSelectedCell(null);
+    setRsiCandidate(null);
+    setMessage("Forecast ready · review the risk before deciding");
   }
 
   async function replay() {
+    eventSource.current?.close();
     setLoading(true);
+    setPlaying(false);
     setError("");
     try {
       await api("/api/v1/demo/reset", { method: "POST" });
       const data = await api("/api/v1/demo/replay", { method: "POST" });
-      setResult(data);
-      setForecast(data.forecast);
-      setDecision(data.decision);
-      setScenario("baseline");
-      setStreamCount(data.observations);
-      setRsiCandidate(null);
-      setMessage("Replay complete · recommendation awaiting human review");
+      receiveCompleted(data, data.observations);
+      setActiveStep("situation");
       await refreshSystem();
-    } catch (value) {
-      setError(value.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (value) { setError(value.message); }
+    finally { setLoading(false); }
   }
 
   async function startStream() {
+    eventSource.current?.close();
     setLoading(true);
+    setPlaying(false);
     setError("");
+    setForecast(null);
+    setWorldState(null);
+    setDecision(null);
     setStreamCount(0);
-    await api("/api/v1/demo/reset", { method: "POST" });
-    const events = new EventSource(`${API}/api/v1/demo/stream?delay_ms=350`);
-    events.addEventListener("observation", () => {
-      setStreamCount((value) => value + 1);
-      setMessage("Streaming observation received · world state updated");
-    });
-    events.addEventListener("complete", async (event) => {
-      const data = JSON.parse(event.data);
-      setResult(data);
-      setForecast(data.forecast);
-      setDecision(data.decision);
-      setScenario("baseline");
-      setMessage("Streaming loop complete · decision generated");
-      setLoading(false);
-      events.close();
-      await refreshSystem();
-    });
-    events.onerror = () => {
-      setError("The event stream was interrupted.");
-      setLoading(false);
-      events.close();
-    };
+    setHorizon(30);
+    setActiveStep("situation");
+    setMessage("Receiving observations…");
+    try {
+      await api("/api/v1/demo/reset", { method: "POST" });
+      const events = new EventSource(`${API}/api/v1/demo/stream?delay_ms=350`);
+      eventSource.current = events;
+      events.addEventListener("observation", (event) => {
+        const data = JSON.parse(event.data);
+        setWorldState(data.state);
+        setStreamCount((value) => value + (data.accepted ? 1 : 0));
+        setMessage(`Observation received · ${data.observation.kind.replaceAll("_", " ")}`);
+      });
+      events.addEventListener("complete", async (event) => {
+        const data = JSON.parse(event.data);
+        receiveCompleted(data, data.forecast.provenance.observation_count);
+        setLoading(false);
+        setPlaying(true);
+        events.close();
+        eventSource.current = null;
+        try { await refreshSystem(); } catch (value) { setError(value.message); }
+      });
+      events.onerror = () => {
+        setError("The stream stopped. Run the demonstration again.");
+        setLoading(false);
+        events.close();
+        eventSource.current = null;
+      };
+    } catch (value) { setError(value.message); setLoading(false); }
   }
 
-  async function simulate(name) {
+  async function simulate(id) {
+    if (!result?.forecast || loading) return;
     setLoading(true);
+    setPlaying(false);
     setError("");
     try {
-      setScenario(name);
-      if (name === "baseline") {
-        setForecast(result?.forecast || forecast);
-      } else {
+      if (id === "baseline") { setForecast(result.forecast); setSimulation(null); }
+      else {
+        const preset = SCENARIOS.find((item) => item.id === id);
         const data = await api("/api/v1/scenarios/simulate", {
-          method: "POST",
-          body: JSON.stringify(SCENARIOS[name]),
+          method: "POST", body: JSON.stringify(preset.payload),
         });
         setForecast(data.scenario);
-        setMessage(`${name.replaceAll("_", " ")} scenario compared with frozen baseline`);
+        setSimulation(data);
+        const baselineByCell = Object.fromEntries(
+          data.baseline.cells.map((cell) => [cell.cell_id, cell]),
+        );
+        const mostChanged = [...data.scenario.cells].sort((left, right) =>
+          Math.abs(riskAt(right, horizon) - riskAt(baselineByCell[right.cell_id], horizon))
+          - Math.abs(riskAt(left, horizon) - riskAt(baselineByCell[left.cell_id], horizon))
+        )[0];
+        if (mostChanged) setSelectedCell(mostChanged.cell_id);
       }
+      setScenario(id);
+      setMessage(id === "baseline" ? "Current outlook restored" : "Scenario compared with the same evidence snapshot");
       await refreshSystem();
-    } catch (value) {
-      setError(value.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (value) { setError(value.message); }
+    finally { setLoading(false); }
   }
 
   async function review(approved) {
     if (!decision) return;
+    setError("");
     try {
       const updated = await api(`/api/v1/decisions/${decision.decision_run_id}/review`, {
         method: "POST",
@@ -132,145 +173,84 @@ function App() {
       setDecision(updated);
       setMessage(approved ? "Recommendation approved for coordination" : "Recommendation rejected");
       await refreshSystem();
-    } catch (value) {
-      setError(value.message);
-    }
+    } catch (value) { setError(value.message); }
   }
 
   async function evaluateRsi() {
+    setError("");
     try {
       const candidate = await api("/api/v1/rsi/evaluate", {
         method: "POST",
         body: JSON.stringify({ event_id: "synthetic-demo-001", burned_cells: ["B1", "B2", "A1"] }),
       });
       setRsiCandidate(candidate);
-      setMessage("RSI diagnostic created a shadow-only candidate");
+      setMessage("A shadow model candidate was created for review");
       await refreshSystem();
-    } catch (value) {
-      setError(value.message);
-    }
+    } catch (value) { setError(value.message); }
   }
 
-  useEffect(() => { replay(); }, []);
+  useEffect(() => { replay(); return () => eventSource.current?.close(); }, []);
+  useEffect(() => {
+    if (!playing) return undefined;
+    const timer = window.setInterval(() => setHorizon((current) => {
+      const index = HORIZONS.indexOf(current);
+      if (index >= HORIZONS.length - 1) { setPlaying(false); return current; }
+      return HORIZONS[index + 1];
+    }), 1500);
+    return () => window.clearInterval(timer);
+  }, [playing]);
 
-  const cells = forecast?.cells || [];
-  const horizonIndex = forecast
-    ? Math.max(0, forecast.cells[0].series.findIndex((item) => item.horizon_minutes === horizon))
-    : 0;
-  const actionByCell = useMemo(
-    () => Object.fromEntries((decision?.actions || []).map((item) => [item.cell_id, item])),
-    [decision],
-  );
+  const cells = useMemo(() => forecast
+    ? forecast.cells.map((cell) => ({ id: cell.cell_id, ...cell.static, risk: riskAt(cell, horizon) }))
+    : Object.entries(worldState?.cells || {}).map(([id, cell]) => ({ id, ...cell.static, risk: cell.burning_probability })),
+  [forecast, horizon, worldState]);
+  const sortedCells = useMemo(() => [...cells].sort((a, b) => b.risk - a.risk), [cells]);
+  const selected = cells.find((cell) => cell.id === selectedCell) || sortedCells[0];
+  const cellArea = ((city?.model_grid_m || 500) / 1000) ** 2;
+  const counts = {
+    high: cells.filter((cell) => cell.risk >= 0.6).length,
+    elevated: cells.filter((cell) => cell.risk >= 0.3 && cell.risk < 0.6).length,
+    watch: cells.filter((cell) => cell.risk >= 0.1 && cell.risk < 0.3).length,
+  };
+  const footprint = (counts.high + counts.elevated + counts.watch) * cellArea;
+  const exposedPopulation = cells.filter((cell) => cell.risk >= 0.3).reduce((sum, cell) => sum + (cell.population || 0), 0);
+  const baselineCells = result?.forecast?.cells || [];
+  const currentCellForecast = forecast?.cells.find((cell) => cell.cell_id === selected?.id);
+  const baselineCellForecast = baselineCells.find((cell) => cell.cell_id === selected?.id);
+  const selectedDelta = currentCellForecast && baselineCellForecast
+    ? riskAt(currentCellForecast, horizon) - riskAt(baselineCellForecast, horizon) : 0;
+  const footprintAt = (minutes) => (forecast?.cells || []).filter((cell) => riskAt(cell, minutes) >= 0.1).length * cellArea;
+  const growthRate = horizon === 30 ? null : (footprint - footprintAt(30)) / ((horizon - 30) / 60);
+  const actions = (decision?.actions || []).filter((action) => action.action !== "monitor");
+  const headline = activeStep === "situation"
+    ? `${counts.high} high-risk cells in the ${horizon}-minute outlook`
+    : activeStep === "scenario"
+      ? scenario === "baseline" ? "Choose a change to compare with the outlook" : `${SCENARIOS.find((item) => item.id === scenario)?.title} compared with baseline`
+      : `${actions.length} areas need a coordination decision`;
 
-  return (
-    <main>
-      <header>
-        <div>
-          <p className="eyebrow">IBM LINUXONE · REAL-TIME AI FOR CRITICAL DECISIONS</p>
-          <h1>CityShield</h1>
-          <p className="subtitle">Wildfire world model · Detect → Predict → Decide → Respond</p>
-        </div>
-        <div className="headerActions">
-          <button className="secondary" onClick={startStream} disabled={loading}>Stream replay</button>
-          <button onClick={replay} disabled={loading}>{loading ? "Running…" : "Instant replay"}</button>
-        </div>
-      </header>
+  return <main className="appShell">
+    <header className="topbar"><div className="brand"><span className="brandMark">C<span>✦</span></span><div><strong>CityShield</strong><small>WILDFIRE DECISION STUDIO</small></div></div><div className="topActions"><span className="modeBadge">SYNTHETIC DEMO · ADVISORY ONLY</span><button className="primaryButton" onClick={startStream} disabled={loading}>{loading ? "Receiving data…" : "Run live demonstration"}</button></div></header>
 
-      <section className="statusbar">
-        <span className="live"><i /> {message}</span>
-        <span>{streamCount} events</span>
-        <span>{forecast?.latency_ms ?? "—"} ms inference</span>
-        <span>{forecast?.forecast_run_id || "no run"}</span>
-      </section>
-      {error && <div className="error">{error}</div>}
+    <section className="intro"><div><p className="eyebrow">REAL-TIME AI FOR CRITICAL DECISIONS · IBM LINUXONE</p><h1>See the risk. Test the change.<br /><em>Decide with evidence.</em></h1></div><div className="introAside"><span className="pulseDot" />{message}<small>{streamCount} observations · {forecast?.latency_ms ?? "—"} ms forecast</small></div></section>
+    {error && <div className="error" role="alert">{error}</div>}
 
-      <section className="kpis">
-        <Kpi label="Platform readiness" value={readiness?.status || "checking"} detail="Only city-specific inputs remain" />
-        <Kpi label="Decision mode" value="Advisory only" detail="Human approval is mandatory" />
-        <Kpi label="Model evidence" value={`${forecast?.members || 0} members`} detail="P10 / P50 / P90 ensemble" />
-        <Kpi label="Audit integrity" value={readiness?.audit?.valid ? "Chain valid" : "Checking"} detail={`${readiness?.audit?.records || 0} signed records`} />
-      </section>
+    <nav className="stepNav" aria-label="Decision workflow">{[
+      { id: "situation", number: "01", title: "Understand risk", detail: "What is changing?" },
+      { id: "scenario", number: "02", title: "Test a scenario", detail: "What if conditions shift?" },
+      { id: "action", number: "03", title: "Review action", detail: "What should people do?" },
+    ].map((step) => <button key={step.id} className={activeStep === step.id ? "stepItem active" : "stepItem"} onClick={() => setActiveStep(step.id)}><b>{step.number}</b><span><strong>{step.title}</strong><small>{step.detail}</small></span></button>)}</nav>
 
-      <section className="toolbar panel">
-        <div>
-          <label>Forecast horizon</label>
-          <div className="segments">
-            {[30, 60, 120].map((value) => <button className={horizon === value ? "active" : ""} onClick={() => setHorizon(value)} key={value}>{value} min</button>)}
-          </div>
-        </div>
-        <div>
-          <label>Paired what-if</label>
-          <div className="segments">
-            {Object.keys(SCENARIOS).map((name) => <button className={scenario === name ? "active" : ""} onClick={() => simulate(name)} key={name}>{name.replaceAll("_", " ")}</button>)}
-          </div>
-        </div>
-      </section>
+    <section className="workspace"><article className="scenePanel panel"><div className="panelTop"><div><p className="eyebrow">CITY WORLD STATE · INTERACTIVE 3D</p><h2>{headline}</h2></div><button className="textButton" onClick={() => setResetSignal((value) => value + 1)}>Reset view ↗</button></div><Suspense fallback={<div className="sceneLoading">Loading 3D view…</div>}><WildfireScene cells={cells} selectedCell={selected?.id} onSelect={setSelectedCell} resetSignal={resetSignal} /></Suspense><div className="timeline"><div className="timelineTop"><strong>Forecast timeline</strong><span>{forecast ? `+${horizon} min` : "Receiving live observations"}</span></div><div className="timelineControls"><button className="playButton" onClick={() => { if (horizon === 120) setHorizon(30); setPlaying(!playing); }} disabled={!forecast} aria-label={playing ? "Pause timeline" : "Play timeline"}>{playing ? "Ⅱ" : "▶"}</button><div className="timeChoices">{HORIZONS.map((value) => <button key={value} className={horizon === value ? "active" : ""} onClick={() => { setPlaying(false); setHorizon(value); }} disabled={!forecast}>+{value} min</button>)}</div></div></div><div className="legend"><span><i className="low" /> Low &lt;10%</span><span><i className="watch" /> Watch 10–29%</span><span><i className="elevated" /> Elevated 30–59%</span><span><i className="high" /> High ≥60%</span></div><p className="disclaimer">Illustrative terrain and synthetic {city?.model_grid_m || 500} m cells. P90 is an uncalibrated model proxy; colored cells are not a fire perimeter or official warning.</p></article>
 
-      <section className="layout">
-        <article className="panel mapPanel">
-          <div className="panelTitle">
-            <div><span className="step">DETECT + PREDICT</span><h2>{horizon}-minute wildfire risk</h2></div>
-            <div className="legend"><span>Low</span><b /><b /><b /><span>High</span></div>
-          </div>
-          <div className="grid">
-            {cells.map((cell) => {
-              const point = cell.series[horizonIndex];
-              const risk = point?.p90 || 0;
-              const action = actionByCell[cell.cell_id];
-              return (
-                <div className="cell" key={cell.cell_id} style={{ "--risk": risk }}>
-                  <div className="cellTop"><strong>{cell.cell_id}</strong><span>P90 {Math.round(risk * 100)}%</span></div>
-                  <div className="cellBottom"><small>Population {cell.static.population}</small><em>P{action?.priority || 1}</em></div>
-                </div>
-              );
-            })}
-          </div>
-          <p className="fineprint">Synthetic 500 m grid. Risk is an uncalibrated ensemble state proxy, not a precise fire perimeter or official warning.</p>
-        </article>
+    <aside className="insightPanel panel">{activeStep === "situation" && <><p className="eyebrow">01 / UNDERSTAND RISK</p><h2>What needs attention?</h2><div className="metricMain"><strong>{formatArea(footprint)}</strong><span>area at Watch risk or higher</span></div><div className="metricPair"><div><strong>{growthRate == null ? "—" : `${formatArea(Math.max(0, growthRate))}/h`}</strong><small>average area growth since +30 min</small></div><div><strong>{exposedPopulation.toLocaleString()}</strong><small>people in elevated/high cells</small></div></div><div className="severityBar" aria-label={`${counts.high} high, ${counts.elevated} elevated, ${counts.watch} watch cells`}><i style={{ flex: counts.high || 0.05 }} /><i style={{ flex: counts.elevated || 0.05 }} /><i style={{ flex: counts.watch || 0.05 }} /></div><p className="countLine">{counts.high} high · {counts.elevated} elevated · {counts.watch} watch</p><div className="sectionDivider" /><p className="eyebrow">SELECTED AREA</p>{selected ? <div className="selectedArea"><div><strong>{selected.id}</strong><span className={`riskBadge ${riskLevel(selected.risk).toLowerCase()}`}>{riskLevel(selected.risk)}</span></div><p>{forecast ? "P90 risk" : "Observed state proxy"} {Math.round(selected.risk * 100)}% · {selected.population?.toLocaleString() || 0} residents · {selected.critical_facilities || 0} critical facilities</p></div> : <p>Run the demonstration to inspect an area.</p>}<div className="areaList">{sortedCells.slice(0, 4).map((cell) => <button key={cell.id} className={selected?.id === cell.id ? "active" : ""} onClick={() => setSelectedCell(cell.id)}><span>{cell.id}</span><b>{Math.round(cell.risk * 100)}%</b></button>)}</div><button className="nextButton" onClick={() => setActiveStep("scenario")}>Next: test a scenario <span>→</span></button></>}
 
-        <article className="panel decisionPanel">
-          <span className="step">DECIDE + RESPOND</span>
-          <h2>Human decision queue</h2>
-          <div className="decisionState">{decision?.status?.replaceAll("_", " ") || "not created"}</div>
-          <div className="queue">
-            {(decision?.actions || []).filter((item) => item.action !== "monitor").slice(0, 5).map((action) => (
-              <div className="action" key={action.cell_id}>
-                <b>P{action.priority}</b>
-                <div><strong>{action.cell_id} · {action.action.replaceAll("_", " ")}</strong><small>{action.reason}</small></div>
-              </div>
-            ))}
-          </div>
-          {decision?.status === "pending_human_review" && <div className="reviewButtons"><button className="reject" onClick={() => review(false)}>Reject</button><button onClick={() => review(true)}>Approve for coordination</button></div>}
-          <div className="warning">No public alert, evacuation, closure or dispatch is executed automatically.</div>
-        </article>
-      </section>
+    {activeStep === "scenario" && <><p className="eyebrow">02 / TEST A SCENARIO</p><h2>Change one assumption</h2><p className="panelLead">Every option uses the same frozen observation snapshot. Select one to see how risk changes.</p><div className="scenarioList">{SCENARIOS.map((item) => <button key={item.id} className={scenario === item.id ? "scenarioCard active" : "scenarioCard"} onClick={() => simulate(item.id)} disabled={loading || !result}><span><strong>{item.title}</strong><small>{item.detail}</small></span><b>{scenario === item.id ? "✓" : "→"}</b></button>)}</div><div className="sectionDivider" /><p className="eyebrow">PAIRED DIFFERENCE · +{horizon} MIN</p><div className="metricMain"><strong>{selectedDelta >= 0 ? "+" : ""}{Math.round(selectedDelta * 100)} pts</strong><span>P90 change in selected cell {selected?.id || "—"}</span></div><p className="comparisonNote">{simulation ? `Scenario run ${simulation.simulation_run_id} · both runs share evidence ${simulation.baseline.evidence_snapshot_id}.` : "Choose a scenario to compare with baseline."}</p><button className="nextButton" onClick={() => setActiveStep("action")}>Next: review action <span>→</span></button></>}
 
-      <section className="lowerGrid">
-        <article className="panel">
-          <span className="step">CONTROLLED RSI</span>
-          <h2>Post-event improvement</h2>
-          <p>Completed incidents may produce a diagnostic candidate. It remains in shadow until held-out replay, safety review, human approval, versioning and rollback are recorded.</p>
-          <button className="secondary" onClick={evaluateRsi}>Run demo evaluation</button>
-          {rsiCandidate && <div className="candidate"><strong>{rsiCandidate.status}</strong><span>Brier {rsiCandidate.evaluation.brier_score}</span><small>{rsiCandidate.proposal.recommended_investigation}</small></div>}
-        </article>
-        <article className="panel">
-          <span className="step">DATA SOURCES</span>
-          <h2>Adapter readiness</h2>
-          <div className="sourceList">{sources.map((source) => <div key={source.source_id}><i className={source.adapter === "implemented" ? "ok" : "wait"} /><span><strong>{source.source_id}</strong><small>{source.role}</small></span><em>{source.ready ? "ready" : "awaiting city"}</em></div>)}</div>
-        </article>
-        <article className="panel">
-          <span className="step">AUDIT</span>
-          <h2>Latest evidence trail</h2>
-          <div className="auditList">{audits.slice(0, 6).map((record) => <div key={record.hash}><span>{record.sequence}</span><b>{record.event_type.replaceAll("_", " ")}</b><code>{record.hash.slice(0, 8)}</code></div>)}</div>
-          <p className="fineprint">{metrics?.observations_ingested || 0} observations · {metrics?.forecasts_created || 0} forecasts · {metrics?.decisions_created || 0} decisions</p>
-        </article>
-      </section>
-    </main>
-  );
-}
+    {activeStep === "action" && <><p className="eyebrow">03 / REVIEW ACTION</p><h2>Human decision queue</h2><p className="panelLead">Recommendations use the frozen baseline forecast. Scenario results inform discussion; they do not silently change the queue.</p><div className="decisionStatus"><span className="pulseDot" />{decision?.status?.replaceAll("_", " ") || "Awaiting forecast"}</div><div className="actionList">{actions.slice(0, 5).map((action) => <div className="actionRow" key={action.cell_id}><b>P{action.priority}</b><div><strong>{action.cell_id} · {action.action.replaceAll("_", " ")}</strong><small>{action.reason}</small></div></div>)}</div>{decision?.status === "pending_human_review" && <div className="reviewButtons"><button className="secondaryButton" onClick={() => review(false)}>Reject</button><button className="primaryButton" onClick={() => review(true)}>Approve for coordination</button></div>}<p className="safetyNote">Approval records a coordination decision. It does not issue an alert, order an evacuation or dispatch responders.</p></>}</aside></section>
 
-function Kpi({ label, value, detail }) {
-  return <article><small>{label}</small><strong>{value}</strong><span>{detail}</span></article>;
+    <details className="evidence panel"><summary><span><b>Evidence & system details</b><small>Sources, audit trail, model limits and improvement</small></span><span>Expand +</span></summary><div className="evidenceGrid"><div><p className="eyebrow">DATA SOURCES</p>{sources.map((source) => <div className="evidenceRow" key={source.source_id}><span>{source.source_id}</span><small>{source.ready ? "Ready" : "Awaiting city"}</small></div>)}</div><div><p className="eyebrow">AUDIT TRAIL</p><p className="evidenceSummary">{readiness?.audit?.valid ? "Chain verified" : "Checking"} · {readiness?.audit?.records || 0} records</p>{audits.slice(0, 5).map((record) => <div className="evidenceRow" key={record.hash}><span>{record.event_type.replaceAll("_", " ")}</span><code>{record.hash.slice(0, 8)}</code></div>)}</div><div><p className="eyebrow">CONTROLLED IMPROVEMENT</p><p className="evidenceSummary">Model {forecast?.model_version || "—"}</p><p>A completed event can produce a shadow candidate. Active predictions never change automatically.</p><button className="secondaryButton" onClick={evaluateRsi} disabled={!forecast}>Run demo evaluation</button>{rsiCandidate && <p className="candidateNote">{rsiCandidate.status} · Brier {rsiCandidate.evaluation.brier_score}</p>}</div></div><div className="evidenceFooter"><span>Evidence {forecast?.evidence_snapshot_id || "—"}</span><span>Forecast {forecast?.forecast_run_id || "—"}</span><span>{metrics?.observations_ingested || 0} observations processed</span></div></details>
+    <footer>CityShield research prototype · Demonstration data only · Built for IBM Z Datathon 2026</footer>
+  </main>;
 }
 
 createRoot(document.getElementById("root")).render(<App />);
