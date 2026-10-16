@@ -9,5 +9,6 @@ COPY docs docs
 
 ENV CITYSHIELD_CONFIG=/opt/app-root/src/config/city.example.json
 EXPOSE 8000
+USER 1001
 CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 

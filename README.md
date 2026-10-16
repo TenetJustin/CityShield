@@ -16,9 +16,11 @@ It implements a transparent **Detect → Decide → Respond** loop:
 ## Current status
 
 - The city is intentionally configurable and currently uses a synthetic 3×3 demonstration grid.
-- Real data adapters are placeholders for NASA FIRMS, NOAA/NWS/RAWS/HRRR, WFIGS, LANDFIRE, USGS 3DEP, roads and Census/CRE.
+- Generic NASA FIRMS, NOAA/NWS and WFIGS clients are implemented. They remain disabled until a city boundary and spatial mapper are configured. LANDFIRE, USGS 3DEP and local response data have explicit file contracts.
 - The backend and demo can run on IBM LinuxONE with the included UBI container definition.
-- Controlled RSI can create shadow candidates but cannot silently change the active model.
+- Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.
+- What-if runs share the frozen baseline evidence snapshot and return a paired simulation ID.
+- The remaining blockers are deliberately city-specific: selecting the city, replacing the synthetic grid, and mapping authoritative local data.
 
 ## Run locally
 
@@ -53,4 +55,28 @@ podman run --rm -p 8000:8000 cityshield:latest
 ```
 
 See [Architecture](docs/ARCHITECTURE.md), [data contract](docs/DATA_CONTRACT.md), and [city-selection checklist](docs/CITY_SELECTION.md).
+
+## Verification
+
+```bash
+make verify
+# With the API running:
+python scripts/smoke_test.py
+```
+
+The automated suite covers temporal visibility, ingestion idempotency, deterministic forecasts, paired scenarios, decision review/outcome separation, audit-chain integrity, external adapter parsing, and RSI promotion gates.
+
+## Documentation
+
+- [API and state transitions](docs/API.md)
+- [Model card and limitations](docs/MODEL_CARD.md)
+- [LinuxONE deployment](docs/DEPLOY_LINUXONE.md)
+- [Real-data integration runbook](docs/REAL_DATA_INTEGRATION.md)
+- [Datathon demo script](docs/DEMO_SCRIPT.md)
+- [Submission checklist](docs/SUBMISSION.md)
+- [Security notes](docs/SECURITY.md)
+
+## Acknowledgement
+
+The workflow design is inspired by the public `cityos-flood` research prototype—especially its snapshot identity, ensemble forecasting, paired counterfactuals, advisory decision loop and controlled improvement boundary. CityShield's wildfire implementation is newly written and does not reuse Shenzhen parameters or claim that flood dynamics transfer to fire behavior.
 

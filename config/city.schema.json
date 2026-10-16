@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cityshield.example/schemas/city-config.json",
+  "title": "CityShield city configuration",
+  "type": "object",
+  "required": ["city_id", "city_name", "timezone", "native_crs", "model_grid_m", "forecast_horizons_minutes", "decision_thresholds", "cells"],
+  "properties": {
+    "city_id": {"type": "string", "minLength": 1},
+    "city_name": {"type": "string", "minLength": 1},
+    "timezone": {"type": "string", "minLength": 1},
+    "native_crs": {"type": "string", "minLength": 1},
+    "model_grid_m": {"type": "integer", "minimum": 50, "maximum": 5000},
+    "forecast_horizons_minutes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "integer", "minimum": 30, "multipleOf": 30}
+    },
+    "advisory_only": {"const": true},
+    "data_mode": {"enum": ["synthetic-demo", "historical-replay", "real"]},
+    "decision_thresholds": {
+      "type": "object",
+      "required": ["evacuation_p90", "resource_stage_p50", "critical_facility_multiplier"],
+      "properties": {
+        "evacuation_p90": {"type": "number", "minimum": 0, "maximum": 1},
+        "resource_stage_p50": {"type": "number", "minimum": 0, "maximum": 1},
+        "critical_facility_multiplier": {"type": "number", "minimum": 0}
+      }
+    },
+    "cells": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "row", "col", "fuel", "slope", "population", "critical_facilities"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "row": {"type": "integer", "minimum": 0},
+          "col": {"type": "integer", "minimum": 0},
+          "fuel": {"type": "number", "minimum": 0, "maximum": 1},
+          "slope": {"type": "number", "minimum": 0, "maximum": 1},
+          "population": {"type": "integer", "minimum": 0},
+          "critical_facilities": {"type": "integer", "minimum": 0}
+        }
+      }
+    }
+  }
+}
+

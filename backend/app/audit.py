@@ -18,11 +18,12 @@ class AuditLog:
     def append(self, event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
         with self._lock:
             previous_hash = self._records[-1]["hash"] if self._records else "GENESIS"
+            frozen_payload = json.loads(json.dumps(payload, default=str))
             record = {
                 "sequence": len(self._records) + 1,
                 "recorded_at": utc_now().isoformat(),
                 "event_type": event_type,
-                "payload": payload,
+                "payload": frozen_payload,
                 "previous_hash": previous_hash,
             }
             canonical = json.dumps(record, sort_keys=True, separators=(",", ":"), default=str)
@@ -38,7 +39,24 @@ class AuditLog:
         with self._lock:
             return list(self._records)
 
+    def verify(self) -> dict[str, Any]:
+        previous_hash = "GENESIS"
+        for expected_sequence, record in enumerate(self._records, start=1):
+            if record.get("sequence") != expected_sequence:
+                return {"valid": False, "failed_sequence": expected_sequence, "reason": "sequence"}
+            if record.get("previous_hash") != previous_hash:
+                return {"valid": False, "failed_sequence": expected_sequence, "reason": "chain"}
+            body = {key: value for key, value in record.items() if key != "hash"}
+            canonical = json.dumps(body, sort_keys=True, separators=(",", ":"), default=str)
+            digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+            if digest != record.get("hash"):
+                return {"valid": False, "failed_sequence": expected_sequence, "reason": "hash"}
+            previous_hash = digest
+        return {"valid": True, "records": len(self._records), "head_hash": previous_hash}
+
     def clear(self) -> None:
         with self._lock:
             self._records.clear()
+            if self.path and self.path.exists():
+                self.path.unlink()
 

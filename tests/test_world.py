@@ -15,6 +15,7 @@ def observation(kind="hotspot", cell_id="B1", value=0.9):
         kind=kind,
         cell_id=cell_id,
         value=value,
+        unit="confidence_0_1",
         valid_at=valid,
         available_at=valid + timedelta(minutes=1),
         source="test",

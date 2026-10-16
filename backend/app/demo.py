@@ -21,6 +21,13 @@ def demo_observations() -> list[Observation]:
             kind=kind,
             cell_id=cell_id,
             value=value,
+            unit={
+                "wind_speed": "m/s",
+                "wind_direction": "degree",
+                "humidity": "percent",
+                "hotspot": "confidence_0_1",
+                "perimeter": "confidence_0_1",
+            }[kind],
             valid_at=base + timedelta(minutes=offset),
             available_at=base + timedelta(minutes=offset + 2),
             source="CityShield synthetic replay",
