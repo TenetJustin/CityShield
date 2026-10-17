@@ -2,6 +2,7 @@
 from pathlib import Path
 import csv
 import json
+import hashlib
 import math
 import argparse
 import numpy as np
@@ -43,7 +44,7 @@ with rasterio.open(SOURCE / 'Tif/LF2016_EVT_CONUS.tif') as src:
     vals, counts = np.unique(arr, return_counts=True)
     frequency = {int(v):int(n) for v,n in zip(vals, counts)}
     report = {'source':'LANDFIRE LF2016_EVT_CONUS/Tif/LF2016_EVT_CONUS.tif',
-              'grid_version':grid['grid_version'], 'grid_file':GRID.name,
+              'grid_version':grid['grid_version'], 'grid_file':GRID.name, 'grid_sha256':hashlib.sha256(GRID.read_bytes()).hexdigest(),
               'aoi_bounds_wgs84':bounds, 'output_crs':str(src.crs),
               'resolution_native_units':list(src.res), 'shape':list(arr.shape),
               'nodata':nodata, 'nodata_pixels':frequency.get(int(nodata),0) if nodata is not None else None,
@@ -54,7 +55,7 @@ with (SOURCE / 'CSV_Data/LF2016_EVT.csv').open(encoding='utf-8-sig', newline='')
     reader=csv.DictReader(f); columns=reader.fieldnames
     legend=[r for r in reader if int(r['VALUE']) in frequency]
 with (OUT/'paradise_lf2016_evt_legend.csv').open('w',encoding='utf-8-sig',newline='') as f:
-    writer=csv.DictWriter(f,fieldnames=columns+['pixel_count']);writer.writeheader()
+    writer=csv.DictWriter(f,fieldnames=columns+['pixel_count'], lineterminator='\n');writer.writeheader()
     for r in legend:writer.writerow({**r,'pixel_count':frequency[int(r['VALUE'])]})
 report['unmatched_category_codes']=sorted(set(frequency)-{int(r['VALUE']) for r in legend})
 with rasterio.open(target) as check:
