@@ -12,7 +12,7 @@ ssh -i ~/.ssh/cityshield_linuxone -o IdentitiesOnly=yes linux1@<VM_IP>
 
 Enter the **private key passphrase** at the SSH prompt. The private key is encrypted; noninteractive SSH fails without this passphrase. Never paste the passphrase into this repository or share the private key with teammates.
 
-On the VM, use the latest `main` commit:
+On the VM, use the latest `main` commit and run the deployment script:
 
 ```bash
 if [ -d "$HOME/CityShield/.git" ]; then
@@ -23,16 +23,12 @@ else
 fi
 git rev-parse --short HEAD
 uname -m
-podman build -f Containerfile.linuxone -t cityshield:latest .
-podman rm -f cityshield 2>/dev/null || true
-podman run -d --name cityshield --restart=unless-stopped \
-  -p 127.0.0.1:8000:8000 \
-  -v cityshield-runtime:/opt/app-root/src/backend/data/runtime \
-  cityshield:latest
+bash scripts/deploy_linuxone.sh
 curl -fsS http://127.0.0.1:8000/health
 curl -fsS http://127.0.0.1:8000/ >/dev/null
-python3 scripts/smoke_test.py http://127.0.0.1:8000
 ```
+
+The script builds a commit-tagged image and tests it on an isolated port and volume before replacing the running container. If build or validation fails, the existing container stays in place. If the final start fails, it tries to restore the previous image. Do not manually remove the running container after a failed build.
 
 If `podman` or `git` is missing on RHEL, install it with `sudo dnf install -y podman git` and rerun the commands. Check `podman logs cityshield` if a command fails.
 
@@ -40,10 +36,10 @@ The API has unauthenticated demo write endpoints. Keep port 8000 bound to `127.0
 
 ```bash
 ssh -i ~/.ssh/cityshield_linuxone -o IdentitiesOnly=yes \
-  -L 8000:127.0.0.1:8000 linux1@<VM_IP>
+  -L 18000:127.0.0.1:8000 linux1@<VM_IP>
 ```
 
-Then open `http://127.0.0.1:8000/`. Each teammate needs their **own** SSH access and tunnel to view this private deployment. A public team URL requires an authenticated HTTPS ingress; do not open port 8000 directly to the internet.
+Keep that remote shell open, then visit `http://127.0.0.1:18000/` on the Mac. Each teammate needs their **own** SSH access and tunnel to view this private deployment. A public team URL requires an authenticated HTTPS ingress; do not open port 8000 directly to the internet.
 
 ## LinuxONE evidence for the submission
 
