@@ -1,0 +1,7 @@
+# Local-only dependencies for the frozen-data build scripts.
+# These are NOT installed in the LinuxONE runtime image.
+httpx>=0.28,<1
+pyshp>=2.3,<4
+shapely>=2.1,<3
+# Optional: used by scripts/verify_nist_sources.py to record PDF page counts.
+pymupdf>=1.24,<2

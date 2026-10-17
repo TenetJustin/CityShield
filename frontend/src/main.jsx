@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from "rea
 import { createRoot } from "react-dom/client";
 import WildfireMap2D from "./WildfireMap2D.jsx";
 import ParadiseData from "./ParadiseData.jsx";
+import DataStatusPanel from "./DataStatusPanel.jsx";
 import "./styles.css";
 
 const WildfireScene = lazy(() => import("./WildfireScene.jsx"));
@@ -270,6 +271,8 @@ function App() {
     {error && <div className="error" role="alert">{error}</div>}
 
     <ParadiseData />
+
+    <DataStatusPanel />
 
     <nav className="stepNav" aria-label="Decision workflow">{[
       { id: "situation", number: "01", title: "Understand risk", detail: "What is changing?" },

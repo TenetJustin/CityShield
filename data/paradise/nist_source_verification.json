@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "source": "nist.gov document endpoints",
+  "verified_at": "2026-10-17T15:17:32.989314+00:00",
+  "checks": [
+    {
+      "window_id": "nist-map-2",
+      "source_url": "https://www.nist.gov/document/map-2",
+      "sha256": "20aa9799c882d11926d9b2d297ba3e37dc4f93671781960ab5a44970f78875e2",
+      "expected_sha256": "20aa9799c882d11926d9b2d297ba3e37dc4f93671781960ab5a44970f78875e2",
+      "sha256_matches": true,
+      "bytes": 25980990,
+      "pages": 1,
+      "page_size_pt": [
+        3456.0,
+        2592.0
+      ],
+      "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+      "status": "verified",
+      "digitized": false,
+      "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted."
+    },
+    {
+      "window_id": "nist-map-3",
+      "source_url": "https://www.nist.gov/document/map-3",
+      "sha256": "a99167c16f4449e53f8ffd9bca5a3ebe940572642e2bd2065b0e34e451c85d1e",
+      "expected_sha256": "a99167c16f4449e53f8ffd9bca5a3ebe940572642e2bd2065b0e34e451c85d1e",
+      "sha256_matches": true,
+      "bytes": 26200537,
+      "pages": 1,
+      "page_size_pt": [
+        3456.0,
+        2592.0
+      ],
+      "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+      "status": "verified",
+      "digitized": false,
+      "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted."
+    },
+    {
+      "window_id": "nist-map-4",
+      "source_url": "https://www.nist.gov/document/map-4",
+      "sha256": "1f113b4b0c111f717871b8e322f365ad3209206c88f7f71ab1c6c29143358bec",
+      "expected_sha256": "1f113b4b0c111f717871b8e322f365ad3209206c88f7f71ab1c6c29143358bec",
+      "sha256_matches": true,
+      "bytes": 26194757,
+      "pages": 1,
+      "page_size_pt": [
+        3456.0,
+        2592.0
+      ],
+      "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+      "status": "verified",
+      "digitized": false,
+      "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted."
+    },
+    {
+      "window_id": "nist-map-5",
+      "source_url": "https://www.nist.gov/document/map-5",
+      "sha256": "c84c2de253bc7fd211d6cc12dd6f75d3983bbbabf6ed8bbbc0b10c89e3138673",
+      "expected_sha256": "c84c2de253bc7fd211d6cc12dd6f75d3983bbbabf6ed8bbbc0b10c89e3138673",
+      "sha256_matches": true,
+      "bytes": 26331804,
+      "pages": 1,
+      "page_size_pt": [
+        3456.0,
+        2592.0
+      ],
+      "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+      "status": "verified",
+      "digitized": false,
+      "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted."
+    }
+  ],
+  "all_verified": true
+}

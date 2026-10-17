@@ -29,6 +29,7 @@ from .paradise import (
     live_snapshot as paradise_live_snapshot,
     terrain_samples as paradise_terrain_samples,
 )
+from . import paradise_grid
 from .rsi import ControlledRSI
 from .schemas import (
     DecisionOutcome,
@@ -144,6 +145,44 @@ def city():
 @app.get("/api/v1/paradise/geography")
 def paradise_geography_data():
     return paradise_geography()
+
+
+@app.get("/api/v1/paradise/grid")
+def paradise_shared_grid():
+    return paradise_grid.grid()
+
+
+@app.get("/api/v1/paradise/grid/summary")
+def paradise_shared_grid_summary():
+    return paradise_grid.grid_summary()
+
+
+@app.get("/api/v1/paradise/data-quality")
+def paradise_data_quality():
+    return paradise_grid.data_quality()
+
+
+@app.get("/api/v1/paradise/replay/config")
+def paradise_replay_configuration():
+    return {
+        "config": paradise_grid.replay_config(),
+        "grid_version": paradise_grid.grid()["grid_version"],
+        "data_version": paradise_grid.grid()["data_version"],
+        "status_policy": {
+            "observed": "measured by a source and mapped to the grid",
+            "derived": "calculated or interpolated from measured data",
+            "predicted": "model output, not an observation",
+            "scenario": "what-if assumption chosen by the user",
+            "assumed": "documented default with no observed layer",
+            "missing": "not available in this build",
+            "synthetic": "simulated agent, vehicle or resource",
+        },
+    }
+
+
+@app.get("/api/v1/paradise/exposure/summary")
+def paradise_exposure_summary():
+    return paradise_grid.exposure_summary()
 
 
 @app.get("/api/v1/paradise/history/camp-fire-final")

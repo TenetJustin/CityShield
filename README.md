@@ -1,6 +1,6 @@
 # CityShield
 
-The console now shows a separate Paradise public-data panel with 2D Census geography, a 3D view of sampled USGS terrain, NOAA hourly weather forecast, NIFC incident query and optional NASA FIRMS detections. The linked 2D, 3D and side-by-side **forecast** views still depict a synthetic exercise grid; no real resident location or geographic fire boundary is implied.
+The console shows a separate Paradise public-data panel with 2D Census geography, a 3D view of sampled USGS terrain, NOAA hourly weather forecast, NIFC incident query and optional NASA FIRMS detections. A new frozen-data status panel reads the machine-readable quality report, and the real-data chain now uses one shared **500 m Paradise grid (841 cells)** with stable `P-row-col` IDs. The legacy 3×3 synthetic exercise remains below and is always labelled synthetic.
 
 CityShield is a single-city wildfire world-model prototype for the IBM Z Datathon 2026 track **Real-Time AI for Critical Decisions**.
 
@@ -17,15 +17,17 @@ It implements a transparent **Detect → Decide → Respond** loop:
 
 ## Current status
 
-- The city is intentionally configurable and currently uses a synthetic 3×3 demonstration grid.
-- The Paradise public-data panel queries NOAA/NWS and NIFC WFIGS with a five-minute cache. NASA FIRMS needs `FIRMS_MAP_KEY`. These observations remain separate from the synthetic forecast model until a validated spatial mapper and real model inputs are available.
-- The backend and demo can run on IBM LinuxONE with the included UBI container definition.
+- A frozen **Paradise 500 m grid** (841 cells, 3 km town buffer) is the single spatial contract for FIRMS hotspots, ACS population exposure, Census roads, terrain and the backend model. See [Paradise replay data](docs/PARADISE_REPLAY.md).
+- The **NASA FIRMS Camp Fire package** contains 2,017 VIIRS detections in 9 snapshots from 2018-11-08 11:50 PT to 2018-11-09 14:01 PT. It is an observation-point layer, not a perimeter.
+- The **NIST Camp Fire timeline** has 4 continuous windows with re-verified source hashes. The map symbols are raster-embedded and remain **undigitized**, so NIST is a temporal constraint only and cannot be used for spatial scoring.
+- The **data quality report** (`data/paradise/data_quality_report.json`) declares 11 pass, 8 warn, 4 blocked and 3 context checks. Blocked layers are NIST spatial extraction, fuel, water and critical facilities. The website shows the same machine-readable report.
+- The **ACS 2013–2017 population** layer allocates 21,785 people to the town clip, 17.6% below the ACS place estimate; it contains no resident locations.
+- The legacy 3×3 synthetic exercise remains available for offline judging and is labelled synthetic everywhere; it is not a historical result.
+- The backend and demo run on IBM LinuxONE with the included UBI container definition.
 - Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.
 - What-if runs share the frozen baseline evidence snapshot and return a paired simulation ID.
-- The console has an interactive 3D synthetic terrain, animated forecast timeline, four risk bands and a guided Understand → Test → Review workflow.
-- A FireTrace-inspired incident-replay mode separates observed edge, hotspot, resources and forecast layers, with actual-versus-predicted comparison.
 - The judging path is offline-safe: a labelled cached exercise, delivery gates and source fallbacks keep the full demo runnable without external APIs.
-- The remaining Paradise blockers are real terrain/fuel and population inputs, historical validation, a calibrated prediction model and authorized operational response data.
+- Remaining blockers are NIST spatial digitization, observed fuel, water and facility layers, a calibrated spread model, official shelters/resources and an authorized operating agreement.
 
 ## Run locally
 
@@ -107,6 +109,7 @@ The automated suite covers temporal visibility, ingestion idempotency, determini
 
 ## Documentation
 
+- [Paradise replay data, grid and quality gates](docs/PARADISE_REPLAY.md)
 - [API and state transitions](docs/API.md)
 - [Model card and limitations](docs/MODEL_CARD.md)
 - [LinuxONE deployment](docs/DEPLOY_LINUXONE.md)

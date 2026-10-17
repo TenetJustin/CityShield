@@ -1,0 +1,95 @@
+{
+  "event_id": "camp-fire-2018",
+  "city_id": "PARADISE_CA",
+  "timezone": "America/Los_Angeles",
+  "grid": {
+    "resolution_m": 500,
+    "buffer_m": 3000,
+    "crs": "LOCAL:PARADISE_EQUIRECTANGULAR_M",
+    "origin": {
+      "longitude": -121.70,
+      "latitude": 39.68
+    },
+    "meters_per_degree_latitude": 110574.0,
+    "meters_per_degree_longitude": 85595.0,
+    "reference_latitude": 39.7635,
+    "id_rule": "P-{row:02d}-{col:02d}; row 0 is the southern edge, col 0 is the western edge"
+  },
+  "forecast": {
+    "model_version": "0.3.0-paradise-cellular-v1",
+    "members": 24,
+    "step_minutes": 10,
+    "max_lead_minutes": 720,
+    "threshold": 0.5,
+    "weather_assumption": {
+      "wind_from_deg": 45,
+      "wind_speed_m_s": 12.0,
+      "humidity_pct": 20.0,
+      "temperature_c": 20.0,
+      "status": "scenario-assumption",
+      "basis": "Documented strong north-east Camp Fire winds are used as a fixed replay assumption. This is not a station observation and is not used to claim measured weather."
+    },
+    "fuel_default": 0.7,
+    "fuel_status": "assumed-default-no-landfire-layer",
+    "spread": {
+      "base_rate_per_minute": 0.012,
+      "wind_rate_gain": 1.8,
+      "slope_rate_gain": 1.2,
+      "lateral_factor": 0.22,
+      "backing_factor": 0.08,
+      "rate_sigma": 0.25,
+      "ignition_threshold": 0.5
+    }
+  },
+  "evaluation": {
+    "probability_threshold": 0.5,
+    "lead_buckets": [
+      {"id": "short", "label": "45-60 min", "min_minutes": 30, "max_minutes": 75},
+      {"id": "medium", "label": "75-180 min", "min_minutes": 75, "max_minutes": 180},
+      {"id": "long", "label": "over 180 min", "min_minutes": 180, "max_minutes": 100000}
+    ],
+    "minimum_windows": 3,
+    "minimum_observed_cells": 10,
+    "minimum_matched_cells": 3
+  },
+  "evacuation": {
+    "household_size": 2.6,
+    "vehicle_ownership": 0.92,
+    "order_delay_minutes": {"median": 25, "sigma": 0.55},
+    "walking_share": 0.04,
+    "free_flow_speed_kmh": 35.0,
+    "step_minutes": 5,
+    "max_simulation_minutes": 600,
+    "shelters": [
+      {
+        "id": "SHELTER-SOUTH",
+        "label": "South exit staging area (scenario)",
+        "cell_id": null,
+        "capacity_people": 6000,
+        "status": "scenario-assumption",
+        "basis": "Placed on the southern highway corridor in the grid. Not an official or verified shelter."
+      },
+      {
+        "id": "SHELTER-WEST",
+        "label": "West exit staging area (scenario)",
+        "cell_id": null,
+        "capacity_people": 5000,
+        "status": "scenario-assumption",
+        "basis": "Placed on the western highway corridor in the grid. Not an official or verified shelter."
+      }
+    ]
+  },
+  "resources": {
+    "status": "scenario-assumption",
+    "resources": [
+      {"id": "E-1", "kind": "engine", "label": "Engine 1 (simulated)", "home_cell_id": null, "speed_kmh": 40, "setup_minutes": 8, "task_minutes": 120, "effectiveness": 0.16},
+      {"id": "E-2", "kind": "engine", "label": "Engine 2 (simulated)", "home_cell_id": null, "speed_kmh": 40, "setup_minutes": 8, "task_minutes": 120, "effectiveness": 0.16},
+      {"id": "E-3", "kind": "engine", "label": "Engine 3 (simulated)", "home_cell_id": null, "speed_kmh": 40, "setup_minutes": 8, "task_minutes": 120, "effectiveness": 0.16},
+      {"id": "C-1", "kind": "crew", "label": "Hand crew 1 (simulated)", "home_cell_id": null, "speed_kmh": 12, "setup_minutes": 15, "task_minutes": 180, "effectiveness": 0.10},
+      {"id": "D-1", "kind": "dozer", "label": "Dozer 1 (simulated)", "home_cell_id": null, "speed_kmh": 10, "setup_minutes": 20, "task_minutes": 180, "effectiveness": 0.12},
+      {"id": "H-1", "kind": "aircraft", "label": "Air tanker 1 (simulated)", "home_cell_id": null, "speed_kmh": 220, "setup_minutes": 12, "task_minutes": 25, "effectiveness": 0.08}
+    ],
+    "water_status": "not_available",
+    "water_note": "No authoritative hydrant, tank or draft-site layer is present in this build. Allocation uses road access, predicted fire risk and population exposure only; water availability is a blocker for operational use."
+  }
+}

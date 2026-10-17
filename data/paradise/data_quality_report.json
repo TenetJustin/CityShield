@@ -1,0 +1,555 @@
+{
+  "area": "Paradise, California",
+  "checks": [
+    {
+      "detail": "camp_fire_firms_2018.json sha256=230d47e938bd19f1\u2026",
+      "id": "firms-file",
+      "layer": "firms",
+      "status": "pass",
+      "summary": "Frozen FIRMS package is present and parses.",
+      "threshold": 1,
+      "value": 2017
+    },
+    {
+      "detail": "latitude, longitude, acq_date, acq_time, acquired_at, satellite and instrument.",
+      "id": "firms-required-fields",
+      "layer": "firms",
+      "status": "pass",
+      "summary": "All required detection fields are present and coordinates are valid.",
+      "threshold": 0,
+      "value": 0
+    },
+    {
+      "detail": "provider duplicate identity groups=0.",
+      "id": "firms-exact-duplicates",
+      "layer": "firms",
+      "status": "pass",
+      "summary": "No exact duplicate identity groups were found after the identity-based dedupe.",
+      "threshold": 0,
+      "value": 0
+    },
+    {
+      "detail": "364 same-time pairs are within 375 m. They are retained as separate pixels but aggregated to grid cells for scoring so they are not counted as independent samples.",
+      "id": "firms-adjacent-detections",
+      "layer": "firms",
+      "status": "info",
+      "summary": "Same-overpass detections can be closer than the 375 m pixel footprint.",
+      "threshold": null,
+      "value": 364
+    },
+    {
+      "detail": "Span 26.18 h; first snapshot 2018-11-08T11:50:00-08:00; max gap 688.0 min.",
+      "id": "firms-time-coverage",
+      "layer": "firms",
+      "status": "warn",
+      "summary": "FIRMS covers 2018-11-08 11:50 PT to 2018-11-09 14:01 PT in 9 snapshots, not the ignition morning.",
+      "threshold": 4,
+      "value": 9
+    },
+    {
+      "detail": "Gap window {'from_utc': '2018-11-08T21:30:00Z', 'to_utc': '2018-11-09T08:58:00Z', 'minutes': 688.0}. Interpolation across this gap is labelled estimated and is not an observation.",
+      "id": "firms-gap",
+      "layer": "firms",
+      "status": "warn",
+      "summary": "An 11.5-hour overnight observation gap separates the 21:30 UTC and 08:58 UTC snapshots.",
+      "threshold": 90,
+      "value": 688.0
+    },
+    {
+      "detail": "1614 of 2017 detections fall inside the grid; 403 are counted but not mapped. 590 are inside the town boundary.",
+      "id": "firms-spatial-scope",
+      "layer": "firms",
+      "status": "warn",
+      "summary": "Only part of the FIRMS query box lies in the shared Paradise grid.",
+      "threshold": 2017,
+      "value": 1614
+    },
+    {
+      "detail": "Hit, IoU and arrival metrics measure agreement with detections, not true burned area.",
+      "id": "firms-not-perimeter",
+      "layer": "firms",
+      "status": "info",
+      "summary": "FIRMS points are active-fire detections, not a burned-area perimeter.",
+      "threshold": null,
+      "value": null
+    },
+    {
+      "detail": "2018-11-08T06:25:00-08:00 to 2018-11-08T10:00:00-08:00; continuous=True.",
+      "id": "nist-windows",
+      "layer": "nist",
+      "status": "pass",
+      "summary": "Four continuous NIST observation windows are recorded with verified source hashes.",
+      "threshold": 4,
+      "value": 4
+    },
+    {
+      "detail": "The PDFs are not committed; the verification record stores hashes, byte sizes and page counts.",
+      "id": "nist-source-hashes",
+      "layer": "nist",
+      "status": "pass",
+      "summary": "All four NIST map PDFs were re-downloaded and their SHA-256 hashes match the timeline manifest.",
+      "threshold": 4,
+      "value": 4
+    },
+    {
+      "detail": "The map annotations and symbols are embedded in a 14370x9746 raster; only time windows and file identity are machine-readable. The replay uses NIST windows as temporal constraints only.",
+      "id": "nist-spatial-digitization",
+      "layer": "nist",
+      "status": "blocked",
+      "summary": "NIST map symbols are not digitized and cannot be used for spatial scoring.",
+      "threshold": null,
+      "value": 0
+    },
+    {
+      "detail": "Coverage 100.0%, block groups 29, missing [].",
+      "id": "population-coverage",
+      "layer": "population",
+      "status": "pass",
+      "summary": "The ACS block-group layer covers the town clip and has no missing population joins.",
+      "threshold": 99.0,
+      "value": 100.0
+    },
+    {
+      "detail": "It is a pre-event exposure baseline; ACS 5-year estimates include sampling error and are not 2018 occupancy.",
+      "id": "population-vintage",
+      "layer": "population",
+      "status": "warn",
+      "summary": "Population is 2013-2017 ACS, not a 2018 count.",
+      "threshold": "2018",
+      "value": "2013-2017 ACS 5-year"
+    },
+    {
+      "detail": "Allocated 21785.14 vs place estimate 26437 (\u00b11629.58 MOE). Exposure metrics inherit this gap.",
+      "id": "population-plausibility",
+      "layer": "population",
+      "status": "warn",
+      "summary": "Area-weighted town population is 17.6% below the ACS place estimate.",
+      "threshold": 10.0,
+      "value": 17.6
+    },
+    {
+      "detail": "Synthetic residents are generated later from aggregated cell population and are labelled simulated.",
+      "id": "population-not-residents",
+      "layer": "population",
+      "status": "pass",
+      "summary": "The layer contains no resident locations.",
+      "threshold": true,
+      "value": true
+    },
+    {
+      "detail": "No closures, lane capacity, traffic speeds or evacuation permissions are included.",
+      "id": "roads-vintage",
+      "layer": "roads",
+      "status": "warn",
+      "summary": "Roads are 2025 Census TIGER/Line geometry, seven years after the event.",
+      "threshold": "2018",
+      "value": "2025 TIGER/Line"
+    },
+    {
+      "detail": "Sample spacing is about 1.29 km; cell elevation and slope are interpolated and marked derived-coarse.",
+      "id": "terrain-resolution",
+      "layer": "terrain",
+      "status": "warn",
+      "summary": "Terrain is a 7\u00d77 display mesh, not a modeling DEM.",
+      "threshold": ">=100",
+      "value": 7
+    },
+    {
+      "detail": "Elevation acquisition date 8/5/2022. This is post-fire terrain and cannot represent 2018 vegetation or fuel.",
+      "id": "terrain-acquisition",
+      "layer": "terrain",
+      "status": "warn",
+      "summary": "The 3DEP samples were acquired in 2022, after the 2018 fire.",
+      "threshold": "2018-11-08",
+      "value": "8/5/2022"
+    },
+    {
+      "detail": "184.81\u2013714.2 m across 49 samples.",
+      "id": "terrain-range",
+      "layer": "terrain",
+      "status": "pass",
+      "summary": "Elevation samples parse into a plausible local relief range.",
+      "threshold": null,
+      "value": [
+        184.81,
+        714.2
+      ]
+    },
+    {
+      "detail": "x_m=(lon-origin.longitude)*meters_per_degree_longitude; y_m=(lat-origin.latitude)*meters_per_degree_latitude",
+      "id": "crs",
+      "layer": "grid",
+      "status": "pass",
+      "summary": "Input vectors use EPSG:4326 and the shared grid uses a documented local metric projection.",
+      "threshold": "documented",
+      "value": "LOCAL:PARADISE_EQUIRECTANGULAR_M"
+    },
+    {
+      "detail": "FIRMS acquired_at is UTC; NIST windows carry -08:00 offsets; the UI converts to PT.",
+      "id": "timezone",
+      "layer": "time",
+      "status": "pass",
+      "summary": "All event timestamps are stored with UTC offsets and displayed in America/Los_Angeles.",
+      "threshold": "America/Los_Angeles",
+      "value": "America/Los_Angeles"
+    },
+    {
+      "detail": "Every cell uses a declared default fuel value of 0.7. This is an assumption, not observed fuel.",
+      "id": "fuel-layer",
+      "layer": "fuel",
+      "status": "blocked",
+      "summary": "No LANDFIRE or other observed fuel layer is bundled.",
+      "threshold": null,
+      "value": 0.7
+    },
+    {
+      "detail": "Resource allocation cannot claim water-aware siting; water availability is an operational blocker.",
+      "id": "water-layer",
+      "layer": "water",
+      "status": "blocked",
+      "summary": "No authoritative hydrant, tank or draft-site layer is bundled.",
+      "threshold": null,
+      "value": null
+    },
+    {
+      "detail": "No school, care facility or hospital locations are invented.",
+      "id": "critical-facilities",
+      "layer": "critical_facilities",
+      "status": "blocked",
+      "summary": "No authoritative critical-facility layer is bundled.",
+      "threshold": null,
+      "value": null
+    },
+    {
+      "detail": "The evacuation model labels them as scenario data, not official shelters.",
+      "id": "shelters",
+      "layer": "shelters",
+      "status": "info",
+      "summary": "Shelter locations and capacities are scenario assumptions.",
+      "threshold": null,
+      "value": "scenario"
+    },
+    {
+      "detail": "841 cells, 29\u00d729, id rule P-{row:02d}-{col:02d}; row 0 is the southern edge, col 0 is the western edge.",
+      "id": "grid-shared",
+      "layer": "grid",
+      "status": "pass",
+      "summary": "All replay layers map to one 500 m grid with stable cell IDs.",
+      "threshold": null,
+      "value": 841
+    }
+  ],
+  "coverage": {
+    "firms": {
+      "confidence_counts": {
+        "h": 322,
+        "l": 155,
+        "n": 1540
+      },
+      "duplicate_identity_groups": 0,
+      "first_acquired_at_local": "2018-11-08T11:50:00-08:00",
+      "first_acquired_at_utc": "2018-11-08T19:50:00Z",
+      "frp": {
+        "count": 2017,
+        "max": 1362.95,
+        "median": 15.67,
+        "min": 0.0
+      },
+      "gap_window": {
+        "from_utc": "2018-11-08T21:30:00Z",
+        "minutes": 688.0,
+        "to_utc": "2018-11-09T08:58:00Z"
+      },
+      "generated_at": "2026-10-17T14:48:53.320130+00:00",
+      "inside_grid_extent": 1614,
+      "inside_town_boundary": 590,
+      "intervals_minutes": [
+        49.0,
+        51.0,
+        688.0,
+        51.0,
+        49.0,
+        582.0,
+        51.0,
+        50.0
+      ],
+      "last_acquired_at_local": "2018-11-09T14:01:00-08:00",
+      "last_acquired_at_utc": "2018-11-09T22:01:00Z",
+      "max_gap_minutes": 688.0,
+      "observations_per_time": {
+        "2018-11-08T19:50:00Z": 250,
+        "2018-11-08T20:39:00Z": 319,
+        "2018-11-08T21:30:00Z": 267,
+        "2018-11-09T08:58:00Z": 258,
+        "2018-11-09T09:49:00Z": 501,
+        "2018-11-09T10:38:00Z": 264,
+        "2018-11-09T20:20:00Z": 49,
+        "2018-11-09T21:11:00Z": 89,
+        "2018-11-09T22:01:00Z": 20
+      },
+      "outside_grid_extent": 403,
+      "provider_schema_version": "1.0",
+      "quality": {
+        "accepted_for_replay": true,
+        "duplicate_count": 0,
+        "first_acquired_at": "2018-11-08T19:50:00Z",
+        "invalid_coordinate_count": 0,
+        "last_acquired_at": "2018-11-09T22:01:00Z",
+        "limitations": [
+          "Satellite detections are observation points, not authoritative fire perimeters.",
+          "Cloud, smoke, scan timing and sensor coverage can create observation gaps.",
+          "Historical detections must be evaluated against an independent progression source."
+        ],
+        "minimum_replay_snapshots": 4,
+        "missing_required_count": 0,
+        "products": [
+          "VIIRS_NOAA20_SP",
+          "VIIRS_SNPP_SP"
+        ],
+        "raw_record_count": 2017,
+        "record_count": 2017,
+        "satellites": [
+          "N",
+          "N20"
+        ],
+        "unique_acquisition_times": 9
+      },
+      "record_count": 2017,
+      "same_time_adjacent_pairs_within_375m": 364,
+      "satellites": {
+        "N": 1107,
+        "N20": 910
+      },
+      "source_products": [
+        {
+          "days": 2,
+          "product": "VIIRS_SNPP_SP",
+          "record_count": 1107,
+          "start_date": "2018-11-08"
+        },
+        {
+          "days": 2,
+          "product": "VIIRS_NOAA20_SP",
+          "record_count": 910,
+          "start_date": "2018-11-08"
+        }
+      ],
+      "span_hours": 26.18,
+      "unique_acquisition_times": 9
+    },
+    "grid": {
+      "bounds_wgs84": {
+        "east": -121.529426,
+        "north": 39.828655,
+        "south": 39.698232,
+        "west": -121.690666
+      },
+      "buffer_m": 3000.0,
+      "cells": 841,
+      "population_total": 21785.14,
+      "resolution_m": 500.0
+    },
+    "nist": {
+      "accepted_for_model_scoring": false,
+      "accepted_for_visual_validation": true,
+      "blocking_item": "Observation symbols have not yet been reviewed and digitized into geospatial records.",
+      "continuous": true,
+      "digitized_spatial_records": 0,
+      "source_verification": {
+        "all_verified": true,
+        "checks": [
+          {
+            "bytes": 25980990,
+            "digitized": false,
+            "expected_sha256": "20aa9799c882d11926d9b2d297ba3e37dc4f93671781960ab5a44970f78875e2",
+            "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted.",
+            "page_size_pt": [
+              3456.0,
+              2592.0
+            ],
+            "pages": 1,
+            "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+            "sha256": "20aa9799c882d11926d9b2d297ba3e37dc4f93671781960ab5a44970f78875e2",
+            "sha256_matches": true,
+            "source_url": "https://www.nist.gov/document/map-2",
+            "status": "verified",
+            "window_id": "nist-map-2"
+          },
+          {
+            "bytes": 26200537,
+            "digitized": false,
+            "expected_sha256": "a99167c16f4449e53f8ffd9bca5a3ebe940572642e2bd2065b0e34e451c85d1e",
+            "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted.",
+            "page_size_pt": [
+              3456.0,
+              2592.0
+            ],
+            "pages": 1,
+            "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+            "sha256": "a99167c16f4449e53f8ffd9bca5a3ebe940572642e2bd2065b0e34e451c85d1e",
+            "sha256_matches": true,
+            "source_url": "https://www.nist.gov/document/map-3",
+            "status": "verified",
+            "window_id": "nist-map-3"
+          },
+          {
+            "bytes": 26194757,
+            "digitized": false,
+            "expected_sha256": "1f113b4b0c111f717871b8e322f365ad3209206c88f7f71ab1c6c29143358bec",
+            "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted.",
+            "page_size_pt": [
+              3456.0,
+              2592.0
+            ],
+            "pages": 1,
+            "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+            "sha256": "1f113b4b0c111f717871b8e322f365ad3209206c88f7f71ab1c6c29143358bec",
+            "sha256_matches": true,
+            "source_url": "https://www.nist.gov/document/map-4",
+            "status": "verified",
+            "window_id": "nist-map-4"
+          },
+          {
+            "bytes": 26331804,
+            "digitized": false,
+            "expected_sha256": "c84c2de253bc7fd211d6cc12dd6f75d3983bbbabf6ed8bbbc0b10c89e3138673",
+            "notes": "Map symbols and annotations are embedded in a 14370x9746 raster image; no machine-readable spatial layer was extracted.",
+            "page_size_pt": [
+              3456.0,
+              2592.0
+            ],
+            "pages": 1,
+            "projection": "NAD83 California State Plane Zone 2 / Lambert Conformal Conic (per map legend)",
+            "sha256": "c84c2de253bc7fd211d6cc12dd6f75d3983bbbabf6ed8bbbc0b10c89e3138673",
+            "sha256_matches": true,
+            "source_url": "https://www.nist.gov/document/map-5",
+            "status": "verified",
+            "window_id": "nist-map-5"
+          }
+        ],
+        "schema_version": "1.0",
+        "source": "nist.gov document endpoints",
+        "verified_at": "2026-10-17T15:17:32.989314+00:00"
+      },
+      "windows": [
+        {
+          "end_at": "2018-11-08T07:45:00-08:00",
+          "id": "nist-map-2",
+          "sha256": "20aa9799c882d11926d9b2d297ba3e37dc4f93671781960ab5a44970f78875e2",
+          "source_url": "https://www.nist.gov/document/map-2",
+          "start_at": "2018-11-08T06:25:00-08:00"
+        },
+        {
+          "end_at": "2018-11-08T08:30:00-08:00",
+          "id": "nist-map-3",
+          "sha256": "a99167c16f4449e53f8ffd9bca5a3ebe940572642e2bd2065b0e34e451c85d1e",
+          "source_url": "https://www.nist.gov/document/map-3",
+          "start_at": "2018-11-08T07:45:00-08:00"
+        },
+        {
+          "end_at": "2018-11-08T09:00:00-08:00",
+          "id": "nist-map-4",
+          "sha256": "1f113b4b0c111f717871b8e322f365ad3209206c88f7f71ab1c6c29143358bec",
+          "source_url": "https://www.nist.gov/document/map-4",
+          "start_at": "2018-11-08T08:30:00-08:00"
+        },
+        {
+          "end_at": "2018-11-08T10:00:00-08:00",
+          "id": "nist-map-5",
+          "sha256": "c84c2de253bc7fd211d6cc12dd6f75d3983bbbabf6ed8bbbc0b10c89e3138673",
+          "source_url": "https://www.nist.gov/document/map-5",
+          "start_at": "2018-11-08T09:00:00-08:00"
+        }
+      ]
+    },
+    "population": {
+      "allocated_estimate": 21785.14,
+      "allocated_moe": 1629.58,
+      "block_groups": 29,
+      "coverage_pct": 100.0,
+      "difference_pct": 17.6,
+      "missing_geoids": [],
+      "place_estimate": 26437,
+      "vintage": "2013-2017 ACS 5-year"
+    },
+    "roads": {
+      "features": 1038,
+      "total_length_km": 321.3,
+      "vintage": "2025 TIGER/Line"
+    },
+    "terrain": {
+      "acquisition_date": "8/5/2022",
+      "elevation_range_m": [
+        184.81,
+        714.2
+      ],
+      "grid_size": 7,
+      "samples": 49,
+      "spacing_km": 1.29
+    }
+  },
+  "data_version": "2b6fca4d33800bd5",
+  "event_id": "camp-fire-2018",
+  "generated_at": "2026-10-17T15:18:28.323652+00:00",
+  "grid_version": "paradise-500m-v1",
+  "inputs": {
+    "firms": {
+      "bytes": 1616764,
+      "file": "camp_fire_firms_2018.json",
+      "sha256": "230d47e938bd19f1a8fec01259dafe0abbece5fa10e9abc61dedacc594f292c2"
+    },
+    "geography": {
+      "bytes": 226496,
+      "file": "geography_2025.geojson",
+      "sha256": "98c64db4a3a7282d6817e0e04106d790530e379ed03c87003d2c249f9f2f3932"
+    },
+    "grid": {
+      "bytes": 809225,
+      "file": "paradise_grid_500m.json",
+      "sha256": "92f5ae47bfdfeec787f49e7508d345404ef380b36e6c3122c947ae07adbb02dd"
+    },
+    "nist_timeline": {
+      "bytes": 2131,
+      "file": "camp_fire_nist_timeline.json",
+      "sha256": "c1f65a2d79b22505548e259db8c7f2fb2abd3bf8a4532e8f4e256e3eef499605"
+    },
+    "population": {
+      "bytes": 553236,
+      "file": "population_acs_2017_block_groups.geojson",
+      "sha256": "0b390a895d9d447776cdbdc77cfe0f6460c75ac90463f8dde1ce8ef6194f4cfe"
+    },
+    "terrain": {
+      "bytes": 6727,
+      "file": "terrain_3dep_7x7.json",
+      "sha256": "db3efd300d1c7f4010d1a3b99edb4dae62ba507fc6f8b77e42b4965ecd087299"
+    }
+  },
+  "limitations": [
+    "FIRMS detections are points, not perimeters; metrics measure detection agreement.",
+    "The first 5.4 hours of the fire (NIST windows 06:25\u201310:00 PT) have no FIRMS observations in this package.",
+    "NIST spatial symbols are not digitized, so NIST cannot be used for spatial scoring.",
+    "Fuel is a declared default; water and critical facilities are absent.",
+    "Population is 2013\u20132017 ACS, pre-event and area-weighted, not 2018 occupancy.",
+    "Roads are 2025 geometry with no closures, capacity or evacuation permissions.",
+    "Shelters and response resources are scenario assumptions, not verified assets.",
+    "The system is a research prototype and cannot issue warnings, evacuations or dispatches."
+  ],
+  "overall": {
+    "accepted_for_firms_model_scoring": true,
+    "accepted_for_historical_replay": true,
+    "accepted_for_nist_spatial_scoring": false,
+    "counts": {
+      "blocked": 4,
+      "fail": 0,
+      "info": 3,
+      "pass": 11,
+      "warn": 8
+    },
+    "operational_ready": false,
+    "status": "usable_with_declared_gaps",
+    "status_label": "Usable with declared gaps",
+    "summary": "FIRMS observations, NIST time windows, ACS exposure and the shared grid are usable for a labelled historical replay. NIST spatial scoring, fuel, water, facilities and official shelters remain unavailable."
+  },
+  "schema_version": "1.0",
+  "timezone": "America/Los_Angeles"
+}
