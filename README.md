@@ -43,6 +43,19 @@ npm install
 npm run dev
 ```
 
+Open the URL printed by Vite, normally **http://localhost:5173/**. Do not open `frontend/index.html` as a `file://` URL: Vite must serve the React modules, and the API must be running.
+
+If ports 8000 or 5173 are already used by another checkout, start the services on separate ports and keep the API URL and CORS origin matched:
+
+```bash
+CITYSHIELD_CORS_ORIGINS=http://127.0.0.1:5174 .venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8001
+# In a second terminal:
+cd frontend
+VITE_API_URL=http://127.0.0.1:8001 npm run dev -- --host 127.0.0.1 --port 5174
+```
+
+Then open **http://127.0.0.1:5174/**.
+
 ## Run the demo
 
 ```bash
