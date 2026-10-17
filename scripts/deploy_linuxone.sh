@@ -23,6 +23,18 @@ wait_for_health() {
   return 1
 }
 
+wait_for_port_release() {
+  local port=$1
+  for _ in {1..30}; do
+    if ! ss -H -ltn "sport = :$port" | grep -q .; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Port $port did not become available after the old container stopped." >&2
+  return 1
+}
+
 run_production() {
   podman run -d --name cityshield-api --restart=unless-stopped \
     -p 127.0.0.1:8000:8000 \
@@ -50,11 +62,13 @@ trap - EXIT
 
 previous_image=$(podman inspect --format '{{.Image}}' cityshield-api 2>/dev/null || true)
 podman rm -f cityshield-api >/dev/null 2>&1 || true
+wait_for_port_release 8000
 
 if ! run_production "$image" || ! wait_for_health 8000; then
   echo "New container failed. Restoring the previous image..." >&2
   podman rm -f cityshield-api >/dev/null 2>&1 || true
   if [[ -n $previous_image ]]; then
+    wait_for_port_release 8000
     run_production "$previous_image"
   fi
   exit 1
