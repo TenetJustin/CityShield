@@ -29,7 +29,7 @@ from .paradise import (
     live_snapshot as paradise_live_snapshot,
     terrain_samples as paradise_terrain_samples,
 )
-from . import paradise_grid
+from . import paradise_eval, paradise_forecast, paradise_grid, paradise_replay
 from .rsi import ControlledRSI
 from .schemas import (
     DecisionOutcome,
@@ -183,6 +183,55 @@ def paradise_replay_configuration():
 @app.get("/api/v1/paradise/exposure/summary")
 def paradise_exposure_summary():
     return paradise_grid.exposure_summary()
+
+
+@app.get("/api/v1/paradise/replay")
+def paradise_replay_package():
+    return paradise_replay.snapshot()
+
+
+@app.get("/api/v1/paradise/replay/frame")
+def paradise_replay_frame(at: str):
+    try:
+        return paradise_replay.frame_at(at)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"invalid timestamp: {exc}") from exc
+
+
+@app.get("/api/v1/paradise/forecast")
+def paradise_forecast_at(
+    at: str,
+    lead_minutes: int = Query(default=60, ge=10, le=720),
+    threshold: float = Query(default=0.5, ge=0.05, le=0.95),
+    name: str = Query(default="baseline", min_length=1, max_length=80),
+    wind_speed_multiplier: float = Query(default=1.0, ge=0.0, le=3.0),
+    wind_direction_delta_deg: float = Query(default=0.0, ge=-180.0, le=180.0),
+    suppression_effectiveness: float = Query(default=0.0, ge=0.0, le=0.9),
+):
+    try:
+        return paradise_forecast.run_forecast(
+            at,
+            lead_minutes,
+            threshold=threshold,
+            scenario={
+                "name": name,
+                "wind_speed_multiplier": wind_speed_multiplier,
+                "wind_direction_delta_deg": wind_direction_delta_deg,
+                "suppression_effectiveness": suppression_effectiveness,
+            },
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.get("/api/v1/paradise/evaluation")
+def paradise_evaluation():
+    return paradise_eval.cached_evaluation()
+
+
+@app.get("/api/v1/paradise/evaluation/summary")
+def paradise_evaluation_summary():
+    return paradise_eval.evaluation_summary()
 
 
 @app.get("/api/v1/paradise/history/camp-fire-final")

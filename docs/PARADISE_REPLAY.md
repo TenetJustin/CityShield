@@ -90,3 +90,66 @@ The FIRMS and population packages are built once with the user's own keys, as do
 - Population and roads are not 2018 operational records.
 - The 3D view is a viewing aid, not a fire-behaviour model.
 - This is a research prototype and cannot issue warnings, evacuation orders or dispatches.
+
+## 7. Historical replay
+
+`GET /api/v1/paradise/replay` returns a frozen replay package with:
+
+- 14 frames: 9 FIRMS observation frames and 5 NIST window boundaries;
+- 2,017 detections aggregated into 591 observed cells;
+- 328 detections outside the shared grid, counted but not mapped;
+- the 688-minute overnight gap preserved as a gap, with no inserted fake frames;
+- observed time in UTC and America/Los_Angeles;
+- per-frame source, data-status, observation count, cumulative detected cells, outside-grid count and observation-latency status.
+
+NIST-only frames carry zero hotspot cells and `spatial_status: "not_digitized"`. The replay does not interpolate a perimeter. The cumulative cell layer is explicitly described as a **detection proxy, not a burn scar**. Weather is `missing` in the replay package because no historical station record is bundled.
+
+The replay ID is a hash of the event, data version and the real frame times, so the same frozen inputs always produce the same replay.
+
+## 8. Time-forward evaluation
+
+`GET /api/v1/paradise/evaluation` serves the precomputed
+`data/paradise/camp_fire_evaluation.json`. The protocol is strict:
+
+1. issue at FIRMS snapshot `t0` using only detections with `acquired_at <= t0`;
+2. score against cells first detected in `(t0, t1]` at the next snapshot;
+3. never use `t1` detections as a forecast input;
+4. report sample counts, lead time and an evidence status per lead bucket.
+
+| Lead bucket | Windows | Observed new cells | Matched | Evidence | Precision | Recall | IoU |
+| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |
+| 45–60 min | 6 | 306 | 217 | sufficient | 0.254 | 0.709 | 0.230 |
+| 75–180 min | 0 | 0 | 0 | insufficient | — | — | — |
+| over 180 min | 2 | 103 | 102 | insufficient (needs 3 windows) | 0.149 | 0.990 | 0.149 |
+
+Short-lead comparison with the isotropic 1.5 km/h radial baseline:
+
+| Variant | Precision | Recall | IoU | Arrival median abs error |
+| --- | ---: | ---: | ---: | ---: |
+| Current wind/slope model | 0.254 | 0.709 | 0.230 | 21 min (217 cells) |
+| Radial baseline | 0.195 | 0.967 | 0.194 | not modelled |
+| Persistence baseline | — | 0.000 | 0.000 | not modelled |
+
+The current model has higher precision and IoU than the radial baseline but **lower recall**: the radial baseline over-predicts over a wide area and catches more detections. This is reported as a trade-off, not as a win. The long-lead bucket is over-predicted and is marked **evidence insufficient** because only two windows exist.
+
+Population metrics use the ACS cell totals. For the short bucket the observed exposed population is 11,721 and the predicted exposed population is 16,136 (absolute error 4,415; median per-window relative error 0.131). Nearest miss distance is 604 m; nearest false-alarm distance is 1,266 m.
+
+NIST is not used for spatial scoring. Its symbols are not digitized, and the evaluation package says so. The metrics answer **detection agreement**, not life-safety performance.
+
+## 9. Forecast API
+
+`GET /api/v1/paradise/forecast?at=<ISO8601>&lead_minutes=60` returns a deterministic ensemble forecast. It refuses to forecast before the first observation (`status: "no_observations"`), uses only past seeds, and includes:
+
+- ensemble probability per cell, median arrival time and seed/new flags;
+- predicted new cells and predicted exposed population at the 0.5 threshold;
+- the declared weather assumption (`scenario-assumption`);
+- the default fuel value, missing water and coarse terrain assumptions;
+- model version, data version, parameter set and limitations.
+
+Scenario query parameters `wind_speed_multiplier`, `wind_direction_delta_deg` and `suppression_effectiveness` change a copy of the forecast; they never change the frozen baseline or the active model.
+
+## 10. Remaining work for phase 5–6
+
+- Link the real replay into the 2D and 3D console with one shared timeline.
+- Add the evacuation-agent and response-resource simulations, labelled simulated.
+- Keep the legacy synthetic exercise available but clearly separated.

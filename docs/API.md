@@ -9,6 +9,14 @@ Interactive OpenAPI documentation is available at `/docs` while the backend is r
 | `GET /api/v1/paradise/history/firms` | Frozen 2018 FIRMS package and its data-quality gate |
 | `GET /api/v1/paradise/history/nist-timeline` | Verified NIST Camp Fire observation windows and scoring gate |
 | `GET /api/v1/paradise/exposure/population` | Pre-fire ACS area-level exposure package and quality gate |
+| `GET /api/v1/paradise/grid` | Shared 500 m grid with per-cell provenance |
+| `GET /api/v1/paradise/grid/summary` | Grid, exposure and quality summary |
+| `GET /api/v1/paradise/data-quality` | Machine-readable data-quality report |
+| `GET /api/v1/paradise/replay` | Real FIRMS/NIST replay frames and source status |
+| `GET /api/v1/paradise/replay/frame?at=...` | Latest real frame at or before a timestamp |
+| `GET /api/v1/paradise/forecast?at=...&lead_minutes=...` | Deterministic time-forward grid forecast |
+| `GET /api/v1/paradise/evaluation` | Strict time-forward evaluation package and evidence status |
+| `GET /api/v1/paradise/evaluation/summary` | Compact evaluation summary |
 | `GET /api/v1/sources` | Adapter, credential and city-dependency status |
 | `GET /api/v1/state` | Current belief state and recent observations |
 | `POST /api/v1/observations` | Validate, deduplicate and assimilate one observation |

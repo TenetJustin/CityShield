@@ -17,12 +17,14 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any
 
-from shapely.geometry import Point, box, shape
+from shapely.geometry import Point, shape
 
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from backend.app import paradise_grid
 
 DATA = ROOT / "data" / "paradise"
 DEST = DATA / "data_quality_report.json"
@@ -84,7 +86,7 @@ def firms_analysis(package: dict[str, Any], town, grid_bounds) -> dict[str, Any]
     inside_grid = sum(
         1
         for item in detections
-        if grid_bounds.contains(Point(item["longitude"], item["latitude"]))
+        if paradise_grid.cell_for_lonlat(item["longitude"], item["latitude"]) is not None
     )
     exact_groups: dict[tuple, int] = {}
     near_pairs = 0
@@ -174,8 +176,7 @@ def build_report() -> dict[str, Any]:
     )
     town = shape(town_feature["geometry"])
     extent = grid["extent"]["bounds_wgs84"]
-    grid_bounds = box(extent["west"], extent["south"], extent["east"], extent["north"])
-    firms_stats = firms_analysis(firms, town, grid_bounds)
+    firms_stats = firms_analysis(firms, town, None)
 
     population_meta = population["metadata"]
     population_quality = population_meta["quality"]

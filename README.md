@@ -22,6 +22,8 @@ It implements a transparent **Detect → Decide → Respond** loop:
 - The **NIST Camp Fire timeline** has 4 continuous windows with re-verified source hashes. The map symbols are raster-embedded and remain **undigitized**, so NIST is a temporal constraint only and cannot be used for spatial scoring.
 - The **data quality report** (`data/paradise/data_quality_report.json`) declares 11 pass, 8 warn, 4 blocked and 3 context checks. Blocked layers are NIST spatial extraction, fuel, water and critical facilities. The website shows the same machine-readable report.
 - The **ACS 2013–2017 population** layer allocates 21,785 people to the town clip, 17.6% below the ACS place estimate; it contains no resident locations.
+- The **real replay** has 14 frames (9 FIRMS observations, 5 NIST boundaries), 591 observed cells and no inserted fake frames. The 688-minute overnight gap is preserved.
+- The **strict time-forward evaluation** scores 6 short-lead windows: precision 0.254, recall 0.709, IoU 0.230, arrival median error 21 min. The long-lead bucket has only 2 windows and is marked **evidence insufficient**. NIST is not scored spatially.
 - The legacy 3×3 synthetic exercise remains available for offline judging and is labelled synthetic everywhere; it is not a historical result.
 - The backend and demo run on IBM LinuxONE with the included UBI container definition.
 - Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.

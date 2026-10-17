@@ -56,13 +56,13 @@
       "value": 688.0
     },
     {
-      "detail": "1614 of 2017 detections fall inside the grid; 403 are counted but not mapped. 590 are inside the town boundary.",
+      "detail": "1689 of 2017 detections fall inside the grid; 328 are counted but not mapped. 590 are inside the town boundary.",
       "id": "firms-spatial-scope",
       "layer": "firms",
       "status": "warn",
       "summary": "Only part of the FIRMS query box lies in the shared Paradise grid.",
       "threshold": 2017,
-      "value": 1614
+      "value": 1689
     },
     {
       "detail": "Hit, IoU and arrival metrics measure agreement with detections, not true burned area.",
@@ -261,7 +261,7 @@
         "to_utc": "2018-11-09T08:58:00Z"
       },
       "generated_at": "2026-10-17T14:48:53.320130+00:00",
-      "inside_grid_extent": 1614,
+      "inside_grid_extent": 1689,
       "inside_town_boundary": 590,
       "intervals_minutes": [
         49.0,
@@ -287,7 +287,7 @@
         "2018-11-09T21:11:00Z": 89,
         "2018-11-09T22:01:00Z": 20
       },
-      "outside_grid_extent": 403,
+      "outside_grid_extent": 328,
       "provider_schema_version": "1.0",
       "quality": {
         "accepted_for_replay": true,
@@ -490,7 +490,7 @@
   },
   "data_version": "2b6fca4d33800bd5",
   "event_id": "camp-fire-2018",
-  "generated_at": "2026-10-17T15:18:28.323652+00:00",
+  "generated_at": "2026-10-17T15:29:20.310519+00:00",
   "grid_version": "paradise-500m-v1",
   "inputs": {
     "firms": {
