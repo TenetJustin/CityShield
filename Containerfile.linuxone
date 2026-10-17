@@ -5,6 +5,7 @@ COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend backend
 COPY config config
+COPY data/paradise data/paradise
 COPY docs docs
 
 ENV CITYSHIELD_CONFIG=/opt/app-root/src/config/city.example.json

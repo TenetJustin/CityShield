@@ -7,4 +7,5 @@ node_modules/
 dist/
 backend/data/audit.jsonl
 backend/data/runtime/
+data/sources/
 

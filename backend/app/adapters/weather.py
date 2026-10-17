@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 import httpx
@@ -32,11 +32,11 @@ class NWSAdapter:
     @staticmethod
     def parse_hourly(payload: dict[str, Any]) -> list[dict[str, Any]]:
         properties = payload.get("properties", {})
-        issued_raw = properties.get("updated")
+        issued_raw = properties.get("updated") or properties.get("updateTime") or properties.get("generatedAt")
         issued_at = (
             datetime.fromisoformat(issued_raw.replace("Z", "+00:00"))
             if issued_raw
-            else datetime.now(timezone.utc)
+            else None
         )
         result = []
         for period in properties.get("periods", []):
@@ -45,7 +45,7 @@ class NWSAdapter:
             result.append(
                 {
                     "valid_at": period.get("startTime"),
-                    "forecast_issued_at": issued_at.isoformat(),
+                    "forecast_issued_at": issued_at.isoformat() if issued_at else None,
                     "temperature": period.get("temperature"),
                     "temperature_unit": period.get("temperatureUnit"),
                     "wind_speed_m_s": round(wind_mph * 0.44704, 3) if wind_mph is not None else None,

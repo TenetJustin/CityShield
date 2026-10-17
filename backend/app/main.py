@@ -17,6 +17,11 @@ from .audit import AuditLog
 from .config import load_city_config, readiness
 from .decision import DecisionService
 from .demo import demo_incident, demo_observations
+from .paradise import (
+    geography as paradise_geography,
+    historical_final_perimeter as paradise_historical_final,
+    live_snapshot as paradise_live_snapshot,
+)
 from .rsi import ControlledRSI
 from .schemas import (
     DecisionOutcome,
@@ -125,6 +130,21 @@ def system_metrics():
 @app.get("/api/v1/city")
 def city():
     return config
+
+
+@app.get("/api/v1/paradise/geography")
+def paradise_geography_data():
+    return paradise_geography()
+
+
+@app.get("/api/v1/paradise/history/camp-fire-final")
+def paradise_camp_fire_final():
+    return paradise_historical_final()
+
+
+@app.get("/api/v1/paradise/live")
+async def paradise_live_data(refresh: bool = False):
+    return await paradise_live_snapshot(force=refresh)
 
 
 @app.get("/api/v1/sources")

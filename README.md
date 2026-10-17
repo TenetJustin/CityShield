@@ -1,6 +1,6 @@
 # CityShield
 
-The console provides linked 2D, 3D and side-by-side wildfire views. They share one timeline, layer controls and selected cell. Both views currently depict the synthetic exercise grid; no real street network, resident location or geographic fire boundary is implied.
+The console now shows a separate Paradise public-data panel with the 2025 Census town boundary and roads, NOAA hourly weather forecast, NIFC incident query and optional NASA FIRMS detections. The linked 2D, 3D and side-by-side forecast views still depict a synthetic exercise grid; no real resident location or geographic fire boundary is implied.
 
 CityShield is a single-city wildfire world-model prototype for the IBM Z Datathon 2026 track **Real-Time AI for Critical Decisions**.
 
@@ -18,14 +18,14 @@ It implements a transparent **Detect → Decide → Respond** loop:
 ## Current status
 
 - The city is intentionally configurable and currently uses a synthetic 3×3 demonstration grid.
-- Generic NASA FIRMS, NOAA/NWS and WFIGS clients are implemented. They remain disabled until a city boundary and spatial mapper are configured. LANDFIRE, USGS 3DEP and local response data have explicit file contracts.
+- The Paradise public-data panel queries NOAA/NWS and NIFC WFIGS with a five-minute cache. NASA FIRMS needs `FIRMS_MAP_KEY`. These observations remain separate from the synthetic forecast model until a validated spatial mapper and real model inputs are available.
 - The backend and demo can run on IBM LinuxONE with the included UBI container definition.
 - Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.
 - What-if runs share the frozen baseline evidence snapshot and return a paired simulation ID.
 - The console has an interactive 3D synthetic terrain, animated forecast timeline, four risk bands and a guided Understand → Test → Review workflow.
 - A FireTrace-inspired incident-replay mode separates observed edge, hotspot, resources and forecast layers, with actual-versus-predicted comparison.
 - The judging path is offline-safe: a labelled cached exercise, delivery gates and source fallbacks keep the full demo runnable without external APIs.
-- The remaining blockers are deliberately city-specific: selecting the city, replacing the synthetic grid, and mapping authoritative local data.
+- The remaining Paradise blockers are real terrain/fuel and population inputs, historical validation, a calibrated prediction model and authorized operational response data.
 
 ## Run locally
 
@@ -55,6 +55,11 @@ VITE_API_URL=http://127.0.0.1:8001 npm run dev -- --host 127.0.0.1 --port 5174
 ```
 
 Then open **http://127.0.0.1:5174/**.
+
+The Paradise public-data panel is available without a NASA key. The API paths
+`/api/v1/paradise/geography` and `/api/v1/paradise/live` expose source details.
+See [Paradise sources and acceptance gaps](data/paradise/SOURCES.md). The live
+panel is not a validated fire prediction or official emergency service.
 
 ## Run the demo
 

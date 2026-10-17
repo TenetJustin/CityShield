@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import WildfireMap2D from "./WildfireMap2D.jsx";
+import ParadiseData from "./ParadiseData.jsx";
 import "./styles.css";
 
 const WildfireScene = lazy(() => import("./WildfireScene.jsx"));
@@ -267,6 +268,8 @@ function App() {
 
     <section className="intro"><div><p className="eyebrow">REAL-TIME AI FOR CRITICAL DECISIONS · IBM LINUXONE</p><h1>See the risk. Test the change.<br /><em>Decide with evidence.</em></h1></div><div className="introAside"><span className="pulseDot" />{message}<small>{streamCount} observations · {forecast?.latency_ms ?? "—"} ms forecast</small></div></section>
     {error && <div className="error" role="alert">{error}</div>}
+
+    <ParadiseData />
 
     <nav className="stepNav" aria-label="Decision workflow">{[
       { id: "situation", number: "01", title: "Understand risk", detail: "What is changing?" },
