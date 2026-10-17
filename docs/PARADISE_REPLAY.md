@@ -168,7 +168,21 @@ The legacy 3×3 synthetic exercise remains available inside a collapsed **Synthe
 
 The URL parameter `?view=scene` or `?view=split` can open the 3D or split view directly for a demo; `?view=map` is the default.
 
-## 11. Remaining work for phase 6
+## 11. Phase 6 response scenario
 
-- Add the evacuation-agent and response-resource simulations, labelled simulated.
-- Keep the legacy synthetic exercise available but clearly separated.
+The site now includes a deterministic, aggregate evacuation and resource
+scenario. Synthetic residents are generated from ACS cell totals; no address or
+individual location is created. Vehicle platoons share assumed road-cell
+capacity, scenario reception areas cap intake, and forecast arrival can block a
+route. Three assumed order times can be compared with the same seed.
+
+Six simulated firefighting units can be allocated by exposure-weighted risk,
+nearest travel time or a no-action baseline. The resulting routes, arrival times
+and protected-exposure proxy are scenario outputs rather than dispatch or rescue
+records. The model exposes formulas, assumptions, versions and a deterministic
+simulation ID. Automated checks enforce population conservation and capacity
+limits.
+
+Remaining validation gaps are historical traffic and warning compliance,
+official shelter intake, observed resource locations/availability, water access,
+suppression outcomes and an operationally calibrated spread forecast.

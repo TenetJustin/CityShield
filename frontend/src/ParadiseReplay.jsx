@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ParadiseGridMap2D from "./ParadiseGridMap2D.jsx";
 import EvaluationPanel from "./EvaluationPanel.jsx";
+import EvacuationPanel from "./EvacuationPanel.jsx";
 import { riskColor } from "./riskVisual.js";
 
 const ParadiseGridScene3D = lazy(() => import("./ParadiseGridScene3D.jsx"));
@@ -393,5 +394,7 @@ export default function ParadiseReplay() {
     </div>
 
     <EvaluationPanel evaluation={evaluation} />
+
+    <EvacuationPanel />
   </section>;
 }

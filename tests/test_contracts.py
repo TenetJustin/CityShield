@@ -67,6 +67,18 @@ def test_audit_reload_continues_existing_chain(tmp_path):
     assert AuditLog(path).verify()["valid"] is True
 
 
+def test_stale_audit_instances_refresh_under_file_lock(tmp_path):
+    path = tmp_path / "audit.jsonl"
+    first = AuditLog(path)
+    second = AuditLog(path)
+    first.append("first", {"writer": 1})
+    second.append("second", {"writer": 2})
+    first.append("third", {"writer": 1})
+    reloaded = AuditLog(path)
+    assert [record["sequence"] for record in reloaded.list()] == [1, 2, 3]
+    assert reloaded.verify()["valid"] is True
+
+
 def test_scenario_bounds_are_enforced():
     with pytest.raises(ValidationError):
         ScenarioRequest(wind_speed_multiplier=5)

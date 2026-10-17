@@ -13,7 +13,9 @@ flowchart TB
       D --> W[Wildfire world state]
       W --> P[PREDICT: 30/60/120 min ensemble]
       P --> X[SIMULATE: wind/resource/road scenarios]
+      P --> Q[RESPONSE SCENARIO: aggregate evacuation queues and simulated resource allocation]
       X --> C[DECIDE: exposure and constrained recommendations]
+      Q --> UI
       C --> H[RESPOND: human approval]
       H --> A[Hash-chained audit and outcome]
       A -. feedback .-> O
@@ -55,6 +57,17 @@ The API, stream/replay processor, state estimator, ensemble forecast, decision e
 `evidence_snapshot_id → forecast_run_id → simulation_run_id → decision_run_id → audit hash`
 
 Every recommendation can therefore be traced to a frozen set of observations, model/config version, scenario and human review. A duplicate observation is ignored by its provider identity rather than silently changing the state twice.
+
+The JSONL audit writer takes an operating-system file lock, refreshes the chain
+head from disk and fsyncs each append. This prevents separate application or test
+processes from assigning the same sequence. Tests use an isolated audit path and
+never append to the developer or deployed runtime chain.
+
+Paradise response scenarios use a parallel identity chain:
+
+`grid/data version + order or issue time + seed/strategy + hazard setting → simulation_id`
+
+They do not enter the operational decision chain and do not create dispatches.
 
 ## Delivery boundary
 

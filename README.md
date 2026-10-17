@@ -25,13 +25,14 @@ It implements a transparent **Detect → Decide → Respond** loop:
 - The **real replay** has 14 frames (9 FIRMS observations, 5 NIST boundaries), 591 observed cells and no inserted fake frames. The 688-minute overnight gap is preserved.
 - The **strict time-forward evaluation** scores 6 short-lead windows: precision 0.254, recall 0.709, IoU 0.230, arrival median error 21 min. The long-lead bucket has only 2 windows and is marked **evidence insufficient**. NIST is not scored spatially.
 - The **real replay console** links 2D roads/observed cells/hotspots with a 3D terrain/risk view on one timeline, with play/pause, speed, scrubbing, observation jumps and automatic 2D fallback when WebGL is unavailable.
+- The **response scenario** generates aggregate synthetic residents from ACS cell totals, compares three assumed evacuation-order times, models road-capacity queues and two off-grid reception areas, and allocates six simulated firefighting resources. A shared-grid 2D view shows model routes and simulated deployments; none are observed resident locations, GPS tracks, shelters or dispatches.
 - The legacy synthetic 3×3 exercise is collapsed and labelled; the default page is the real Camp Fire replay.
 - The legacy 3×3 synthetic exercise remains available for offline judging and is labelled synthetic everywhere; it is not a historical result.
 - The backend and demo run on IBM LinuxONE with the included UBI container definition.
 - Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.
 - What-if runs share the frozen baseline evidence snapshot and return a paired simulation ID.
 - The judging path is offline-safe: a labelled cached exercise, delivery gates and source fallbacks keep the full demo runnable without external APIs.
-- Remaining blockers are NIST spatial digitization, observed fuel, water and facility layers, a calibrated spread model, official shelters/resources and an authorized operating agreement.
+- Remaining blockers are NIST spatial digitization, observed fuel, water and facility layers, historical traffic/weather and evacuation outcomes, a calibrated spread model, official shelters/resources and an authorized operating agreement.
 
 ## Run locally
 

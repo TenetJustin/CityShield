@@ -22,6 +22,23 @@ CityShield demonstrates how streaming observations can update a city-scale wildf
 
 A grid graph propagates neighbor pressure using fuel, remaining fuel, terrain, dryness, temperature, wind strength and directional alignment. Twenty-four deterministic-seed ensemble members perturb weather and spread rate. Identical evidence, configuration and scenario inputs reproduce the same run ID and values.
 
+## Paradise evacuation and resource scenario
+
+The response model uses the same frozen 500 m Paradise grid. It converts
+aggregate ACS exposure into vehicle and walking demand, applies a seeded
+lognormal departure delay, and moves vehicle platoons through a four-neighbour
+road-cell graph with assumed capacity. Two off-grid reception areas are scenario
+destinations. A forecast cell can block a route after its predicted arrival time.
+
+The resource model ranks forecast cells either by predicted probability times
+aggregate population exposure or by assumed travel time. Six simulated units are
+assigned to unique cells. `protected_population` is probability × population ×
+assumed effectiveness; it is not an observed rescue count or a validated benefit.
+
+All scenarios carry a deterministic identity containing the order/issue time,
+seed or strategy, hazard setting, model/data version and forecast identity.
+Population totals are checked for conservation.
+
 ## Known limitations
 
 - Synthetic cells and uncalibrated parameters are used until a city is selected.
@@ -30,6 +47,9 @@ A grid graph propagates neighbor pressure using fuel, remaining fuel, terrain, d
 - Route optimization is disabled until an authoritative road graph, closures and capacity assumptions are available.
 - Satellite active-fire detections must not be displayed as exact fire-front geometry.
 - No recommendation is an official warning, evacuation order, road closure or dispatch command.
+- Evacuation behaviour, road capacity, reception areas, resource positions and effectiveness are assumed rather than observed.
+- The response model has no historical traffic, order-compliance, shelter-intake, apparatus GPS or rescue-outcome validation.
+- Fire suppression does not feed back into the spread forecast.
 
 ## Validation required after city selection
 

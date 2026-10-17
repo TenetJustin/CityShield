@@ -29,12 +29,15 @@ from .paradise import (
     live_snapshot as paradise_live_snapshot,
     terrain_samples as paradise_terrain_samples,
 )
-from . import paradise_eval, paradise_forecast, paradise_grid, paradise_replay
+from . import paradise_eval, paradise_forecast, paradise_grid, paradise_replay, paradise_response
 from .rsi import ControlledRSI
 from .schemas import (
     DecisionOutcome,
     DecisionReview,
+    EvacuationCompareRequest,
+    EvacuationRequest,
     Observation,
+    ResourceRequest,
     RSIEvaluationRequest,
     RSIGateRequest,
     ScenarioRequest,
@@ -232,6 +235,60 @@ def paradise_evaluation():
 @app.get("/api/v1/paradise/evaluation/summary")
 def paradise_evaluation_summary():
     return paradise_eval.evaluation_summary()
+
+
+@app.get("/api/v1/paradise/response/config")
+def paradise_response_configuration():
+    configuration = paradise_grid.replay_config()
+    return {
+        "evacuation": configuration["evacuation"],
+        "resources": configuration["resources"],
+        "status_policy": {
+            "residents": "synthetic agents generated from aggregated ACS cell population",
+            "vehicles": "simulated vehicle flows, not observed traffic",
+            "shelters": "scenario reception areas, not official shelters",
+            "fire_resources": "simulated units and effectiveness, not real dispatch",
+            "fire_hazard": "predicted from the uncalibrated model at the order time, not observed",
+        },
+    }
+
+
+@app.post("/api/v1/paradise/evacuation/simulate")
+def paradise_evacuation_simulate(request: EvacuationRequest):
+    try:
+        return paradise_response.simulate_evacuation(
+            request.order_at_utc,
+            seed=request.seed,
+            shelter_capacity_factor=request.shelter_capacity_factor,
+            include_fire_hazard=request.include_fire_hazard,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/api/v1/paradise/evacuation/compare")
+def paradise_evacuation_compare(request: EvacuationCompareRequest):
+    try:
+        return paradise_response.compare_evacuation(
+            request.order_times,
+            seed=request.seed,
+            shelter_capacity_factor=request.shelter_capacity_factor,
+            include_fire_hazard=request.include_fire_hazard,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/api/v1/paradise/resources/simulate")
+def paradise_resources_simulate(request: ResourceRequest):
+    try:
+        return paradise_response.simulate_resources(
+            request.at_utc,
+            lead_minutes=request.lead_minutes,
+            strategy=request.strategy,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/api/v1/paradise/history/camp-fire-final")

@@ -7,7 +7,7 @@
     "buffer_m": 3000,
     "crs": "LOCAL:PARADISE_EQUIRECTANGULAR_M",
     "origin": {
-      "longitude": -121.70,
+      "longitude": -121.7,
       "latitude": 39.68
     },
     "meters_per_degree_latitude": 110574.0,
@@ -44,9 +44,24 @@
   "evaluation": {
     "probability_threshold": 0.5,
     "lead_buckets": [
-      {"id": "short", "label": "45-60 min", "min_minutes": 30, "max_minutes": 75},
-      {"id": "medium", "label": "75-180 min", "min_minutes": 75, "max_minutes": 180},
-      {"id": "long", "label": "over 180 min", "min_minutes": 180, "max_minutes": 100000}
+      {
+        "id": "short",
+        "label": "45-60 min",
+        "min_minutes": 30,
+        "max_minutes": 75
+      },
+      {
+        "id": "medium",
+        "label": "75-180 min",
+        "min_minutes": 75,
+        "max_minutes": 180
+      },
+      {
+        "id": "long",
+        "label": "over 180 min",
+        "min_minutes": 180,
+        "max_minutes": 100000
+      }
     ],
     "minimum_windows": 3,
     "minimum_observed_cells": 10,
@@ -55,41 +70,138 @@
   "evacuation": {
     "household_size": 2.6,
     "vehicle_ownership": 0.92,
-    "order_delay_minutes": {"median": 25, "sigma": 0.55},
-    "walking_share": 0.04,
+    "order_delay_minutes": {
+      "median": 25,
+      "sigma": 0.55
+    },
+    "walking_share": 0.08,
     "free_flow_speed_kmh": 35.0,
-    "step_minutes": 5,
+    "step_minutes": 1,
     "max_simulation_minutes": 600,
     "shelters": [
       {
         "id": "SHELTER-SOUTH",
-        "label": "South exit staging area (scenario)",
-        "cell_id": null,
-        "capacity_people": 6000,
+        "label": "South reception area via Clark Rd (scenario, off-grid)",
+        "cell_id": "P-06-14",
+        "capacity_people": 12000,
         "status": "scenario-assumption",
-        "basis": "Placed on the southern highway corridor in the grid. Not an official or verified shelter."
+        "basis": "Exit cell P-06-14 on Clark Rd/State Hwy 191; the reception area is a scenario destination outside the modeled grid, not an official shelter.",
+        "off_grid_minutes": 35,
+        "reception_distance_km": 25,
+        "outside_grid": true
       },
       {
         "id": "SHELTER-WEST",
-        "label": "West exit staging area (scenario)",
-        "cell_id": null,
-        "capacity_people": 5000,
+        "label": "West reception area via Wagstaff Rd (scenario, off-grid)",
+        "cell_id": "P-16-10",
+        "capacity_people": 9000,
         "status": "scenario-assumption",
-        "basis": "Placed on the western highway corridor in the grid. Not an official or verified shelter."
+        "basis": "Exit cell P-16-10 on W Wagstaff Rd; the reception area is a scenario destination outside the modeled grid, not an official shelter.",
+        "off_grid_minutes": 30,
+        "reception_distance_km": 22,
+        "outside_grid": true
       }
-    ]
+    ],
+    "order_scenarios": [
+      {
+        "id": "early",
+        "at_utc": "2018-11-08T14:25:00Z",
+        "label": "06:25 PT, first NIST window"
+      },
+      {
+        "id": "mid",
+        "at_utc": "2018-11-08T16:30:00Z",
+        "label": "08:30 PT, NIST window"
+      },
+      {
+        "id": "late",
+        "at_utc": "2018-11-08T19:50:00Z",
+        "label": "11:50 PT, first FIRMS snapshot"
+      }
+    ],
+    "road_capacity_vph": {
+      "major": 1600,
+      "local": 700
+    },
+    "walking_speed_kmh": 5.0,
+    "pre_evacuation": {
+      "reference_at_utc": "2018-11-08T14:25:00Z",
+      "share_per_hour": 0.06,
+      "max_share": 0.6,
+      "status": "scenario-assumption",
+      "note": "Residents are assumed to self-evacuate at 6% per hour before the modelled order time. This is a scenario assumption, not observed traffic or compliance data."
+    }
   },
   "resources": {
     "status": "scenario-assumption",
     "resources": [
-      {"id": "E-1", "kind": "engine", "label": "Engine 1 (simulated)", "home_cell_id": null, "speed_kmh": 40, "setup_minutes": 8, "task_minutes": 120, "effectiveness": 0.16},
-      {"id": "E-2", "kind": "engine", "label": "Engine 2 (simulated)", "home_cell_id": null, "speed_kmh": 40, "setup_minutes": 8, "task_minutes": 120, "effectiveness": 0.16},
-      {"id": "E-3", "kind": "engine", "label": "Engine 3 (simulated)", "home_cell_id": null, "speed_kmh": 40, "setup_minutes": 8, "task_minutes": 120, "effectiveness": 0.16},
-      {"id": "C-1", "kind": "crew", "label": "Hand crew 1 (simulated)", "home_cell_id": null, "speed_kmh": 12, "setup_minutes": 15, "task_minutes": 180, "effectiveness": 0.10},
-      {"id": "D-1", "kind": "dozer", "label": "Dozer 1 (simulated)", "home_cell_id": null, "speed_kmh": 10, "setup_minutes": 20, "task_minutes": 180, "effectiveness": 0.12},
-      {"id": "H-1", "kind": "aircraft", "label": "Air tanker 1 (simulated)", "home_cell_id": null, "speed_kmh": 220, "setup_minutes": 12, "task_minutes": 25, "effectiveness": 0.08}
+      {
+        "id": "E-1",
+        "kind": "engine",
+        "label": "Engine 1 (simulated)",
+        "home_cell_id": "P-09-14",
+        "speed_kmh": 40,
+        "setup_minutes": 8,
+        "task_minutes": 120,
+        "effectiveness": 0.16
+      },
+      {
+        "id": "E-2",
+        "kind": "engine",
+        "label": "Engine 2 (simulated)",
+        "home_cell_id": "P-09-14",
+        "speed_kmh": 40,
+        "setup_minutes": 8,
+        "task_minutes": 120,
+        "effectiveness": 0.16
+      },
+      {
+        "id": "E-3",
+        "kind": "engine",
+        "label": "Engine 3 (simulated)",
+        "home_cell_id": "P-09-14",
+        "speed_kmh": 40,
+        "setup_minutes": 8,
+        "task_minutes": 120,
+        "effectiveness": 0.16
+      },
+      {
+        "id": "C-1",
+        "kind": "crew",
+        "label": "Hand crew 1 (simulated)",
+        "home_cell_id": "P-17-11",
+        "speed_kmh": 12,
+        "setup_minutes": 15,
+        "task_minutes": 180,
+        "effectiveness": 0.1
+      },
+      {
+        "id": "D-1",
+        "kind": "dozer",
+        "label": "Dozer 1 (simulated)",
+        "home_cell_id": "P-17-11",
+        "speed_kmh": 10,
+        "setup_minutes": 20,
+        "task_minutes": 180,
+        "effectiveness": 0.12
+      },
+      {
+        "id": "H-1",
+        "kind": "aircraft",
+        "label": "Air tanker 1 (simulated)",
+        "home_cell_id": "P-09-14",
+        "speed_kmh": 220,
+        "setup_minutes": 12,
+        "task_minutes": 25,
+        "effectiveness": 0.08
+      }
     ],
     "water_status": "not_available",
-    "water_note": "No authoritative hydrant, tank or draft-site layer is present in this build. Allocation uses road access, predicted fire risk and population exposure only; water availability is a blocker for operational use."
+    "water_note": "No authoritative hydrant, tank or draft-site layer is present in this build. Allocation uses road access, predicted fire risk and population exposure only; water availability is a blocker for operational use.",
+    "strategies": [
+      "exposure_weighted",
+      "nearest_first",
+      "none"
+    ]
   }
 }

@@ -17,6 +17,10 @@ Interactive OpenAPI documentation is available at `/docs` while the backend is r
 | `GET /api/v1/paradise/forecast?at=...&lead_minutes=...` | Deterministic time-forward grid forecast |
 | `GET /api/v1/paradise/evaluation` | Strict time-forward evaluation package and evidence status |
 | `GET /api/v1/paradise/evaluation/summary` | Compact evaluation summary |
+| `GET /api/v1/paradise/response/config` | Declared evacuation/resource assumptions and status policy |
+| `POST /api/v1/paradise/evacuation/simulate` | Run one aggregate synthetic-resident evacuation scenario |
+| `POST /api/v1/paradise/evacuation/compare` | Compare assumed evacuation-order times with one fixed seed |
+| `POST /api/v1/paradise/resources/simulate` | Allocate simulated resources by exposure, travel time or no-action baseline |
 | `GET /api/v1/sources` | Adapter, credential and city-dependency status |
 | `GET /api/v1/state` | Current belief state and recent observations |
 | `POST /api/v1/observations` | Validate, deduplicate and assimilate one observation |
@@ -39,6 +43,25 @@ pending_human_review
 ```
 
 Approval does not execute a public warning or operational command. It records that a human accepted the recommendation for coordination.
+
+## Paradise response scenarios
+
+The response endpoints are deterministic scenario tools. Each response includes a
+`simulation_id`, `model_version`, grid/data versions, assumptions and limitations.
+Residents are cell-level synthetic agents generated from aggregate ACS exposure.
+Road capacity, departure behaviour, reception areas, resource home cells and
+effectiveness are assumptions. Resource routes are model paths rather than GPS
+tracks, and the protected-population value is an illustrative expected-exposure
+calculation without suppression feedback.
+
+Population accounting follows:
+
+```text
+total = pre-evacuated + evacuated + trapped + unaccommodated + not-cleared
+```
+
+An early scenario with no FIRMS-seeded forecast reports `no_forecast`; a zero
+trapped count in that state is not evidence of safety.
 
 ## Error semantics
 

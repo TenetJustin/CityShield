@@ -105,6 +105,32 @@ class RSIEvaluationRequest(BaseModel):
     burned_cells: list[str]
 
 
+class EvacuationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    order_at_utc: str = Field(min_length=10)
+    seed: int = Field(default=20181108, ge=0, le=2_147_483_647)
+    shelter_capacity_factor: float = Field(default=1.0, gt=0.0, le=3.0)
+    include_fire_hazard: bool = True
+
+
+class EvacuationCompareRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    order_times: list[str] | None = None
+    seed: int = Field(default=20181108, ge=0, le=2_147_483_647)
+    shelter_capacity_factor: float = Field(default=1.0, gt=0.0, le=3.0)
+    include_fire_hazard: bool = True
+
+
+class ResourceRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    at_utc: str = Field(min_length=10)
+    lead_minutes: int = Field(default=120, ge=10, le=720)
+    strategy: Literal["exposure_weighted", "nearest_first", "none"] = "exposure_weighted"
+
+
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 

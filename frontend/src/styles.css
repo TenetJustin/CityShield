@@ -432,3 +432,60 @@ button:focus-visible,summary:focus-visible{outline-color:#d7a84b}
 .legacyExercise[open]>summary{border-bottom:1px solid rgba(228,238,230,.1);margin-bottom:12px}
 .legacyExercise .stepNav{margin-top:0}
 @media(max-width:700px){.legacyExercise{padding:0 12px}}
+
+/* Simulated evacuation and response. Everything here is scenario data. */
+.evac{margin-top:14px;padding:18px;background:rgba(12,30,22,.55);box-shadow:inset 0 1px 0 rgba(240,255,244,.08),0 0 0 1px rgba(171,222,187,.09)}
+.evacControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0 10px;padding:9px 11px;border-radius:8px;background:rgba(215,168,75,.07);box-shadow:inset 0 0 0 1px rgba(215,168,75,.14)}
+.evacToggle{display:flex;align-items:center;gap:7px;color:#f0d899;font-size:9px;font-weight:750;white-space:nowrap}
+.evacToggle input{accent-color:#d7a84b}
+.evacControlNote{color:#8fa99a;font-size:8px;line-height:1.4}
+.evacOrderSwitch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:10px}
+.evacOrderSwitch button{display:grid;gap:3px;text-align:left;border:0;border-radius:8px;padding:9px 10px;background:rgba(228,238,230,.045);color:#b8c9bf;box-shadow:inset 0 0 0 1px rgba(228,238,230,.07)}
+.evacOrderSwitch button strong{font-size:10px}.evacOrderSwitch button small{font-size:7px;color:#8fa99a}
+.evacOrderSwitch button.active{background:rgba(176,90,36,.18);color:#ffe9d5;box-shadow:inset 0 0 0 1px rgba(215,120,60,.34)}
+.evacOrderSwitch button.active small{color:#d8bd88}
+.evacGrid{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}
+.evacCard{padding:12px;border-radius:10px;background:rgba(8,24,17,.5);box-shadow:inset 0 0 0 1px rgba(228,238,230,.07);min-width:0}
+.evacCardTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}
+.evacCardTop strong{display:block;font-size:14px;letter-spacing:-.02em;margin-top:3px}
+.evacTableWrap{overflow-x:auto}
+.evacTable{width:100%;border-collapse:collapse;font-size:8px;min-width:520px}
+.evacTable th{text-align:left;padding:6px 5px;color:#7f9d8c;font-size:7px;font-weight:750;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(228,238,230,.1);white-space:nowrap}
+.evacTable td{padding:6px 5px;color:#b8c9bf;border-bottom:1px solid rgba(228,238,230,.06);white-space:nowrap}
+.evacTable tr.active td{color:#ffe9d5;background:rgba(176,90,36,.1)}
+.evacTable td:first-child{text-transform:capitalize;color:#d3e2d8}
+.evacHazard{display:inline-block;padding:3px 6px;border-radius:999px;font-size:7px;font-weight:800;white-space:nowrap}
+.evacHazard.predicted{background:rgba(176,90,36,.2);color:#ffcba8}
+.evacHazard.no_forecast{background:rgba(215,168,75,.13);color:#f0d899}
+.evacHazard.disabled_for_comparison{background:rgba(228,238,230,.07);color:#9fb5a7}
+.evacChart{display:block;width:100%;height:auto;margin:6px 0}
+.evacStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:7px}
+.evacStats>div{display:grid;gap:2px;padding:8px;border-radius:6px;background:rgba(228,238,230,.035)}
+.evacStats small{font-size:7px;color:#7f9d8c;line-height:1.3}
+.evacStats strong{font-size:14px;color:#e4eee6;letter-spacing:-.02em}
+.evacStats strong.missing{color:#f0a78a}
+.evacShelters{display:grid;gap:6px;margin-top:8px}
+.evacShelter{padding:8px;border-radius:7px;background:rgba(228,238,230,.03)}
+.evacShelter>div:first-child{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:5px}
+.evacShelter strong{font-size:9px}.evacShelter small{font-size:7px;color:#8fa99a;line-height:1.35}
+.evacBar{position:relative;height:12px;border-radius:999px;background:rgba(3,15,10,.55);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+.evacBar i{display:block;height:100%;background:linear-gradient(90deg,#92783a,#d7a84b);border-radius:999px}
+.evacBar span{position:absolute;inset:0;display:grid;place-items:center;font-size:7px;color:#fff;text-shadow:0 1px 2px #000}
+.evacNote{margin:8px 0 0;color:#8fa99a;font-size:8px;line-height:1.45}
+.evacIdentity{display:block;margin-top:8px;color:#667f70;font:7px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+.evacResources{margin-top:12px;padding:12px;border-radius:10px;background:rgba(8,24,17,.5);box-shadow:inset 0 0 0 1px rgba(228,238,230,.07)}
+.responseMapWrap{display:grid;grid-template-columns:minmax(260px,440px) 1fr;gap:12px;margin-top:12px;padding:12px;border-radius:10px;background:rgba(8,24,17,.5);box-shadow:inset 0 0 0 1px rgba(228,238,230,.07);align-items:start}
+.responseMapHeader{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;align-items:end}.responseMapHeader strong{font-size:14px}.responseMapHeader small{max-width:330px;color:#8fa99a;font-size:8px;line-height:1.4;text-align:right}
+.responseMap{display:block;width:100%;max-width:440px;height:auto;border-radius:7px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.responseLegend{display:grid;gap:9px;padding:8px 0;color:#9fb5a7;font-size:8px}.responseLegend span{display:flex;gap:8px;align-items:center}.responseLegend i{display:inline-block;width:18px;height:3px;border-radius:3px;background:#7fc79a}.responseLegend i.unassigned{width:8px;height:8px;border-radius:50%;background:#d7a84b}.responseLegend i.shelter{width:9px;height:9px;border-radius:1px;background:#f0d899}.responseLegend i.resource{height:1px;background:#7fb8d8;border-top:1px dashed #7fb8d8}
+.evacStrategySwitch{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
+.evacStrategySwitch button{border:0;border-radius:6px;padding:7px 9px;background:rgba(228,238,230,.045);color:#9fb5a7;font-size:8px;font-weight:750;box-shadow:inset 0 0 0 1px rgba(228,238,230,.08)}
+.evacStrategySwitch button.active{background:rgba(215,168,75,.18);color:#ffe3a6;box-shadow:inset 0 0 0 1px rgba(215,168,75,.3)}
+.evacFormulas{margin-top:12px;border-radius:9px;background:rgba(8,24,17,.4);box-shadow:inset 0 0 0 1px rgba(228,238,230,.07);padding:0 12px}
+.evacFormulas>summary{cursor:pointer;padding:11px 0;color:#d8bd88;font-size:9px;font-weight:800}
+.evacFormulaGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:2px 0 12px;border-top:1px solid rgba(228,238,230,.08)}
+.evacFormulaGrid>div{padding-top:9px}.evacFormulaGrid small{font-size:7px;color:#92cba0;letter-spacing:.07em;font-weight:800}
+.evacFormulaGrid p{margin:4px 0 0;color:#9fb5a7;font-size:8px;line-height:1.45}
+@media(max-width:1150px){.evacGrid{grid-template-columns:1fr}.evacFormulaGrid{grid-template-columns:1fr}.evacOrderSwitch{grid-template-columns:1fr}}
+@media(max-width:720px){.responseMapWrap{grid-template-columns:1fr}.responseMapHeader{display:grid}.responseMapHeader small{text-align:left}.responseLegend{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.evac{padding:13px}.evacStats{grid-template-columns:repeat(2,minmax(0,1fr))}.evacTable{min-width:480px}}
