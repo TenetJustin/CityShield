@@ -13,6 +13,11 @@ def test_geography_is_paradise_and_has_source_hashes():
     historical = paradise.historical_final_perimeter()
     assert historical["properties"]["incident_number"] == "00016737"
     assert historical["properties"]["not_time_series"] is True
+    terrain = paradise.terrain_samples()
+    assert terrain["grid_size"] == 7
+    assert len(terrain["samples"]) == 49
+    assert all(sample["resolution_m"] == 1 for sample in terrain["samples"])
+    assert "display-only" in terrain["purpose"]
 
 
 def test_live_source_failure_stays_visible_and_does_not_invent_fire(monkeypatch):

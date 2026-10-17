@@ -1,6 +1,6 @@
 # CityShield
 
-The console now shows a separate Paradise public-data panel with the 2025 Census town boundary and roads, NOAA hourly weather forecast, NIFC incident query and optional NASA FIRMS detections. The linked 2D, 3D and side-by-side forecast views still depict a synthetic exercise grid; no real resident location or geographic fire boundary is implied.
+The console now shows a separate Paradise public-data panel with 2D Census geography, a 3D view of sampled USGS terrain, NOAA hourly weather forecast, NIFC incident query and optional NASA FIRMS detections. The linked 2D, 3D and side-by-side **forecast** views still depict a synthetic exercise grid; no real resident location or geographic fire boundary is implied.
 
 CityShield is a single-city wildfire world-model prototype for the IBM Z Datathon 2026 track **Real-Time AI for Critical Decisions**.
 

@@ -21,6 +21,7 @@ from .paradise import (
     geography as paradise_geography,
     historical_final_perimeter as paradise_historical_final,
     live_snapshot as paradise_live_snapshot,
+    terrain_samples as paradise_terrain_samples,
 )
 from .rsi import ControlledRSI
 from .schemas import (
@@ -140,6 +141,11 @@ def paradise_geography_data():
 @app.get("/api/v1/paradise/history/camp-fire-final")
 def paradise_camp_fire_final():
     return paradise_historical_final()
+
+
+@app.get("/api/v1/paradise/terrain")
+def paradise_terrain_data():
+    return paradise_terrain_samples()
 
 
 @app.get("/api/v1/paradise/live")

@@ -21,6 +21,14 @@ boundary and simplified to 0.00005 degree **for display only**. It is a final
 outcome, not an observed time series; inclusion in the polygon does not prove
 that every location burned. The default map does not show this historical layer.
 
+`terrain_3dep_7x7.json` holds 49 elevation samples from the [USGS 3DEP
+Elevation Point Query Service](https://epqs.nationalmap.gov/v1/docs), generated
+by `scripts/build_paradise_terrain.py`. The service reported 1 m underlying
+resolution and an acquisition date of August 5, 2022 for every sample, but
+the **display mesh is only 7 × 7 samples across the town bounding box**.
+Between points, the 3D view interpolates heights and exaggerates vertical
+relief. It is not a DEM suitable for modeling local fire spread or roads.
+
 `GET /api/v1/paradise/live` fetches current public NOAA/NWS hourly forecast
 data and NIFC WFIGS incident points. It additionally fetches NASA FIRMS VIIRS
 detections when `FIRMS_MAP_KEY` is configured. Each response reports fetch time,
@@ -39,8 +47,9 @@ into that exercise or treated as a validated spread prediction.
    for **out-of-sample** evaluation. [NIST's Camp Fire timeline](https://www.nist.gov/programs-projects/wildland-urban-interface-wui-fire-data-collection-parcel-vulnerabilities/nist/fire)
    is an authoritative reconstruction, but its mapped observations require
    a reviewed machine-readable extraction before use.
-2. Aggregate documented, current USGS 3DEP terrain and LANDFIRE fuel layers
-   to actual model cells. Measure resolution and missingness.
+2. Aggregate documented, current full-resolution USGS 3DEP terrain and
+   LANDFIRE fuel layers to actual model cells. Measure resolution and
+   missingness; the 49 visualization samples do not pass this gate.
 3. Obtain geography-specific population exposure, evacuation zones, road
    status/capacity, shelter status and response-resource feeds. Private
    resident and responder locations require agreements and access controls.

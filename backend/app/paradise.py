@@ -18,6 +18,7 @@ from .adapters.wfigs import WFIGSAdapter
 
 GEOGRAPHY = Path(__file__).resolve().parents[2] / "data" / "paradise" / "geography_2025.geojson"
 HISTORICAL_FINAL = Path(__file__).resolve().parents[2] / "data" / "paradise" / "camp_fire_final_2018_town_clip.geojson"
+TERRAIN = Path(__file__).resolve().parents[2] / "data" / "paradise" / "terrain_3dep_7x7.json"
 LATITUDE, LONGITUDE = 39.7541919, -121.6064
 BOUNDS = BoundingBox(-121.70, 39.68, -121.52, 39.85)
 _cached: dict | None = None
@@ -33,6 +34,11 @@ def geography() -> dict:
 @lru_cache(maxsize=1)
 def historical_final_perimeter() -> dict:
     return json.loads(HISTORICAL_FINAL.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def terrain_samples() -> dict:
+    return json.loads(TERRAIN.read_text(encoding="utf-8"))
 
 
 async def live_snapshot(force: bool = False) -> dict:

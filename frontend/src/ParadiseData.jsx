@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+
+const ParadiseTerrain3D = lazy(() => import("./ParadiseTerrain3D.jsx"));
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
 const W = 800;
@@ -22,6 +24,8 @@ export default function ParadiseData() {
   const [geo, setGeo] = useState(null);
   const [historical, setHistorical] = useState(null);
   const [showHistorical, setShowHistorical] = useState(false);
+  const [terrain, setTerrain] = useState(null);
+  const [mapMode, setMapMode] = useState("2d");
   const [live, setLive] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,6 +49,7 @@ export default function ParadiseData() {
   useEffect(() => {
     refresh();
     fetch(`${API}/api/v1/paradise/history/camp-fire-final`).then((response) => response.ok ? response.json() : null).then(setHistorical).catch(() => setHistorical(null));
+    fetch(`${API}/api/v1/paradise/terrain`).then((response) => response.ok ? response.json() : null).then(setTerrain).catch(() => setTerrain(null));
     const timer = window.setInterval(refresh, 300000);
     return () => window.clearInterval(timer);
   }, []);
@@ -71,10 +76,11 @@ export default function ParadiseData() {
   const sources = live?.sources || {};
 
   return <section className="paradisePanel panel" aria-label="Paradise public data">
-    <div className="paradiseHeader"><div><p className="eyebrow">PARADISE, CALIFORNIA · PUBLIC DATA</p><h2>Real map and current source observations</h2><p>Town boundary and roads are Census 2025 geography. Weather is a NOAA forecast; incident records come from NIFC. This panel is separate from the exercise forecast below.</p></div><div className="paradiseButtons"><button className="secondaryButton" onClick={() => setShowHistorical((value) => !value)} disabled={!historical} aria-pressed={showHistorical}>{showHistorical ? "Hide 2018 boundary" : "Show 2018 boundary"}</button><button className="secondaryButton" onClick={refresh} disabled={loading}>{loading ? "Checking…" : "Refresh sources"}</button></div></div>
+    <div className="paradiseHeader"><div><p className="eyebrow">PARADISE, CALIFORNIA · PUBLIC DATA</p><h2>Real map and current source observations</h2><p>Town boundary and roads are Census 2025 geography. The 3D view uses USGS 3DEP elevation samples. Weather is a NOAA forecast; incident records come from NIFC. This panel is separate from the exercise forecast below.</p></div><div className="paradiseButtons"><button className="secondaryButton" onClick={() => { setMapMode("2d"); setShowHistorical((value) => !value); }} disabled={!historical} aria-pressed={showHistorical}>{showHistorical ? "Hide 2018 boundary" : "Show 2018 boundary"}</button><button className="secondaryButton" onClick={refresh} disabled={loading}>{loading ? "Checking…" : "Refresh sources"}</button></div></div>
     {error && <p className="paradiseError" role="alert">{error}. Last successful snapshot, if any, remains visible below.</p>}
+    <div className="paradiseViewSwitch" role="group" aria-label="Paradise map view"><button className={mapMode === "2d" ? "active" : ""} onClick={() => setMapMode("2d")} aria-pressed={mapMode === "2d"}>2D town map</button><button className={mapMode === "3d" ? "active" : ""} onClick={() => setMapMode("3d")} aria-pressed={mapMode === "3d"} disabled={!terrain}>3D terrain</button><span>{mapMode === "3d" ? "49 USGS samples · vertical relief exaggerated for viewing" : "Census roads · town boundary"}</span></div>
     <div className="paradiseContent">
-      <div className="paradiseMap">
+      {mapMode === "3d" && terrain ? <Suspense fallback={<div className="paradiseMap">Loading 3D terrain…</div>}><ParadiseTerrain3D geography={geo} terrain={terrain} live={live} /></Suspense> : <div className="paradiseMap">
         {projection && <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Paradise town boundary and 2025 Census roads">
           <rect width={W} height={H} fill="#0a1e19" />
           {lines(boundary.geometry).map((ring, index) => <path key={`b-${index}`} d={path(ring, true)} fill="#1b3d30" stroke="#bde5a8" strokeWidth="2.5" />)}
@@ -86,7 +92,7 @@ export default function ParadiseData() {
           {showHistorical && <text x="45" y="124" fill="#ffc89c" fontSize="12">2018 final perimeter · historical only</text>}
         </svg>}
         {!projection && <span>Loading Census geography…</span>}
-      </div>
+      </div>}
       <div className="paradiseFacts">
         <div><small>NOAA HOURLY FORECAST</small><strong>{sources["noaa-nws"]?.status === "ok" ? `${weather?.temperature ?? "—"}°${weather?.temperature_unit || "F"}` : "Unavailable"}</strong><span>{weather ? `${weather.wind_speed_m_s ?? "—"} m/s wind · ${weather.humidity_pct ?? "—"}% humidity` : sources["noaa-nws"]?.error || "Waiting for source"}</span><em>Valid {timestamp(weather?.valid_at)} · issued {timestamp(weather?.forecast_issued_at)}</em></div>
         <div><small>NIFC INCIDENT QUERY</small><strong>{sources["nifc-wfigs"]?.status === "ok" ? `${live.incidents.length} records` : "Unavailable"}</strong><span>{sources["nifc-wfigs"]?.status === "ok" ? "Within the Paradise query area; zero records does not mean no fire." : sources["nifc-wfigs"]?.error || "Waiting for source"}</span></div>
