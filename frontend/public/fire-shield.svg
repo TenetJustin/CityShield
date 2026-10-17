@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" fill="none">
+  <defs>
+    <linearGradient id="copper" x1="0" y1="0" x2="300" y2="300" gradientUnits="userSpaceOnUse"><stop stop-color="#b5753b"/><stop offset=".5" stop-color="#cd9355"/><stop offset="1" stop-color="#b97b3e"/></linearGradient>
+    <linearGradient id="silver" x1="70" y1="70" x2="220" y2="330" gradientUnits="userSpaceOnUse"><stop stop-color="#f3f2e7"/><stop offset=".5" stop-color="#f9f8ee"/><stop offset="1" stop-color="#ddded4"/></linearGradient>
+  </defs>
+  <path d="M150 16 C117 42 72 59 27 70 L27 171 C27 246 72 301 150 342 C228 301 273 246 273 171 L273 70 C228 59 183 42 150 16 Z" fill="url(#copper)" stroke="#e7b77c" stroke-width="2"/>
+  <path d="M150 342 C105 320 61 286 62 246 C62 204 98 169 126 132 C151 100 152 81 138 57 C176 87 186 121 180 151 C175 184 152 211 132 236 C108 267 115 310 150 342 Z" fill="url(#silver)"/>
+  <path d="M150 342 C130 318 121 297 133 269 C146 238 183 224 190 193 C195 177 190 157 186 142 C185 163 204 180 217 200 C238 231 236 265 216 291 C202 309 176 328 150 342 Z" fill="url(#silver)"/>
+</svg>
