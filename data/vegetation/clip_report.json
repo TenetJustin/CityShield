@@ -2,6 +2,7 @@
   "source": "LANDFIRE LF2016_EVT_CONUS/Tif/LF2016_EVT_CONUS.tif",
   "grid_version": "paradise-500m-v1",
   "grid_file": "paradise_grid_500m.json",
+  "grid_sha256": "92f5ae47bfdfeec787f49e7508d345404ef380b36e6c3122c947ae07adbb02dd",
   "aoi_bounds_wgs84": [
     -121.694159,
     39.698087,
