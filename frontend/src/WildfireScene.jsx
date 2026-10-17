@@ -1,20 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-
-const COLORS = {
-  low: 0x356f56,
-  watch: 0x92783a,
-  elevated: 0xd7a84b,
-  severe: 0xb05a24,
-};
-
-function riskColor(risk) {
-  if (risk >= 0.6) return COLORS.severe;
-  if (risk >= 0.3) return COLORS.elevated;
-  if (risk >= 0.1) return COLORS.watch;
-  return COLORS.low;
-}
+import { riskColor } from "./riskVisual.js";
 
 function disposeObject(object) {
   object.traverse((child) => {

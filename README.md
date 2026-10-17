@@ -1,5 +1,7 @@
 # CityShield
 
+The console provides linked 2D, 3D and side-by-side wildfire views. They share one timeline, layer controls and selected cell. Both views currently depict the synthetic exercise grid; no real street network, resident location or geographic fire boundary is implied.
+
 CityShield is a single-city wildfire world-model prototype for the IBM Z Datathon 2026 track **Real-Time AI for Critical Decisions**.
 
 It implements a transparent **Detect → Decide → Respond** loop:

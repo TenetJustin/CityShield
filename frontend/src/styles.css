@@ -123,6 +123,26 @@ button:focus-visible,summary:focus-visible{
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.panel,.introAside,.stepNav{background:var(--glass-face-strong)}}
 
+.viewSelector{display:inline-flex;gap:4px;padding:4px;margin:0 0 12px;border-radius:9px;background:rgba(5,24,16,.65);box-shadow:inset 0 0 0 1px rgba(228,238,230,.12)}
+.viewSelector button{border:0;border-radius:7px;padding:8px 12px;background:transparent;color:#a2b9a9;font-size:11px;font-weight:800;cursor:pointer}
+.viewSelector button.active{background:#c5f0a4;color:#10231a}
+.viewSelector button:focus-visible,.map2dCell:focus-visible{outline:2px solid #f5ffdf;outline-offset:2px}
+.spatialViews{min-width:0}
+.spatialViews.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.map2dWrap{height:clamp(330px,37vw,530px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:11px;background:radial-gradient(circle at 50% 45%,#203d2c,#0b1d18 70%);box-shadow:inset 0 0 0 1px rgba(171,222,187,.2)}
+.map2dCanvas{display:block;width:100%;height:100%;padding:32px 24px 37px;box-sizing:border-box}
+.map2dTop{position:absolute;z-index:1;top:12px;left:13px;right:13px;display:flex;justify-content:space-between;gap:10px;color:#cae9d0;font-size:9px;font-weight:800;letter-spacing:.11em;pointer-events:none}
+.map2dTop span:last-child{color:#edca83}
+.map2dFoot{position:absolute;left:13px;right:13px;bottom:10px;text-align:center;color:#aac2b1;font-size:9px;line-height:1.3;pointer-events:none}
+.map2dCell{cursor:pointer}
+.map2dCell:hover rect:first-child{filter:brightness(1.2)}
+.map2dCellId{fill:#fff9ec;font-size:19px;font-weight:800;pointer-events:none}
+.map2dCellRisk{fill:#fff9ec;font-size:27px;font-weight:850;pointer-events:none}
+.map2dResource{fill:#173b2b;font-size:20px;font-weight:900;text-anchor:middle;pointer-events:none}
+.spatialViews.split .map2dWrap,.spatialViews.split .sceneWrap,.spatialViews.split .sceneLoading{height:400px}
+@media(max-width:1050px){.spatialViews.split{grid-template-columns:1fr}.spatialViews.split .map2dWrap,.spatialViews.split .sceneWrap{height:420px}}
+@media(max-width:700px){.viewSelector{width:100%;box-sizing:border-box}.viewSelector button{flex:1;padding:8px 5px;font-size:10px}.map2dWrap{height:340px}.map2dCanvas{padding:25px 9px 35px}.map2dTop,.map2dFoot{font-size:8px}.spatialViews.split .map2dWrap,.spatialViews.split .sceneWrap{height:340px}}
+
 .modeSwitch{display:flex;padding:3px;border-radius:9px;background:rgba(228,238,230,.055);box-shadow:inset 0 0 0 1px rgba(228,238,230,.1)}
 .modeSwitch button{border:0;border-radius:7px;padding:7px 10px;background:transparent;color:#8eaa99;font-size:10px;font-weight:800;white-space:nowrap}
 .modeSwitch button.active{background:rgba(176,90,36,.24);color:#ffe7d4;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 0 0 1px rgba(176,90,36,.3)}
