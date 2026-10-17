@@ -341,7 +341,7 @@ def reset_demo():
     world.reset()
     decisions.decisions.clear()
     rsi.candidates.clear()
-    audit.clear()
+    _audit("demo_reset", {"reset": True})
     for key in metrics:
         metrics[key] = None if key == "last_forecast_latency_ms" else 0
     return {"reset": True}

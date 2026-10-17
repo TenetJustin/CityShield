@@ -57,6 +57,16 @@ def test_audit_payload_is_frozen_from_later_mutation():
     assert audit.list()[0]["payload"]["status"] == "pending"
 
 
+def test_audit_reload_continues_existing_chain(tmp_path):
+    path = tmp_path / "audit.jsonl"
+    first = AuditLog(path)
+    first.append("first", {"value": 1})
+    second = AuditLog(path)
+    second.append("second", {"value": 2})
+    assert second.verify()["records"] == 2
+    assert AuditLog(path).verify()["valid"] is True
+
+
 def test_scenario_bounds_are_enforced():
     with pytest.raises(ValidationError):
         ScenarioRequest(wind_speed_multiplier=5)

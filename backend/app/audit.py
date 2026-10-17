@@ -14,6 +14,12 @@ class AuditLog:
         self.path = path
         self._records: list[dict[str, Any]] = []
         self._lock = RLock()
+        if self.path and self.path.is_file():
+            with self.path.open(encoding="utf-8") as handle:
+                self._records = [json.loads(line) for line in handle if line.strip()]
+            verification = self.verify()
+            if not verification["valid"]:
+                raise ValueError(f"invalid audit chain on disk: {verification}")
 
     def append(self, event_type: str, payload: dict[str, Any]) -> dict[str, Any]:
         with self._lock:

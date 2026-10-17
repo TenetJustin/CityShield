@@ -17,6 +17,14 @@ def test_demo_end_to_end():
     assert payload["forecast"]["latency_ms"] >= 0
 
 
+def test_demo_reset_preserves_audit_chain():
+    before = client.get("/api/v1/audits").json()["verification"]["records"]
+    assert client.post("/api/v1/demo/reset").status_code == 200
+    after = client.get("/api/v1/audits").json()["verification"]
+    assert after["valid"] is True
+    assert after["records"] == before + 1
+
+
 def test_offline_incident_contract_and_delivery_gate():
     incident = client.get("/api/v1/demo/incident")
     assert incident.status_code == 200
