@@ -1,3 +1,11 @@
+FROM docker.io/library/node:22-bookworm-slim AS frontend-builder
+
+WORKDIR /build/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
 FROM registry.access.redhat.com/ubi9/python-312:latest
 
 WORKDIR /opt/app-root/src
@@ -7,6 +15,7 @@ COPY backend backend
 COPY config config
 COPY data/paradise data/paradise
 COPY docs docs
+COPY --from=frontend-builder /build/frontend/dist frontend/dist
 
 ENV CITYSHIELD_CONFIG=/opt/app-root/src/config/city.example.json
 EXPOSE 8000

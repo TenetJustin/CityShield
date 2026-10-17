@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 
 const ParadiseTerrain3D = lazy(() => import("./ParadiseTerrain3D.jsx"));
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://localhost:8000" : "");
 const W = 800;
 const H = 680;
 const PAD = 32;

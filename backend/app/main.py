@@ -10,6 +10,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from .adapters import source_registry
 from .adapters.registry import delivery_readiness
@@ -72,6 +73,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
+
+frontend_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 
 def _audit(event_type: str, payload: dict) -> dict:
@@ -391,3 +394,8 @@ async def stream_demo(delay_ms: int = Query(default=250, ge=0, le=5000)):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+# The LinuxONE image includes the built console; API routes above take priority.
+if frontend_dist.is_dir():
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="console")
