@@ -99,7 +99,18 @@ if [[ -z $public_url ]]; then
   exit 1
 fi
 
-curl -fsS "$public_url/health" >/dev/null
+public_ready=0
+for _ in {1..12}; do
+  if curl -fsS --max-time 15 "$public_url/health" >/dev/null; then
+    public_ready=1
+    break
+  fi
+  sleep 5
+done
+if [[ $public_ready -ne 1 ]]; then
+  echo "Tunnel is connected, but its public DNS name is not reachable yet." >&2
+  exit 1
+fi
 printf '%s\n' "$public_url" | tee "$PUBLIC_ROOT/public-url.txt"
 echo "CityShield is public at $public_url and served by $APP_URL on LinuxONE."
 
