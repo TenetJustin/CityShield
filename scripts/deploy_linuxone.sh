@@ -26,7 +26,7 @@ wait_for_health() {
 run_production() {
   podman run -d --name cityshield-api --restart=unless-stopped \
     -p 127.0.0.1:8000:8000 \
-    -v "cityshield-runtime:$runtime_path" \
+    -v "cityshield-runtime:$runtime_path:Z" \
     "$1"
 }
 
@@ -39,7 +39,7 @@ cleanup() { podman rm -f cityshield-candidate >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 podman run -d --name cityshield-candidate \
   -p 127.0.0.1:18001:8000 \
-  -v "cityshield-validation:$runtime_path" \
+  -v "cityshield-validation:$runtime_path:Z" \
   "$image"
 wait_for_health 18001
 curl -fsS http://127.0.0.1:18001/ >/dev/null
