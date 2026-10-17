@@ -65,6 +65,16 @@ def _direction_factor(alignment: float) -> float:
     return backing + (lateral - backing) * (1.0 + alignment)
 
 
+def _downwind_unit_vector(wind_from_deg: float) -> tuple[float, float]:
+    """Return the east/north unit vector toward which the wind blows.
+
+    Meteorological wind direction is the direction *from* which the wind
+    arrives. The spread alignment therefore uses the opposite bearing.
+    """
+    bearing = math.radians((wind_from_deg + 180.0) % 360.0)
+    return math.sin(bearing), math.cos(bearing)
+
+
 def _weather(parameters: dict[str, Any], member: int, rng: random.Random) -> dict[str, float]:
     base = parameters["weather_assumption"]
     if member == 0:
@@ -89,8 +99,7 @@ def _member_edge_probabilities(weather: dict[str, float], multiplier: float) -> 
     wind_speed_factor = min(2.4, 0.5 + weather["wind_speed_m_s"] / 8.0)
     humidity_factor = max(0.2, 1.0 - weather["humidity_pct"] / 100.0)
     temperature_factor = max(0.7, min(1.4, 0.75 + weather["temperature_c"] / 100.0))
-    bearing = math.radians(weather["wind_from_deg"])
-    downwind = (math.sin(bearing), math.cos(bearing))
+    downwind = _downwind_unit_vector(weather["wind_from_deg"])
     result = []
     for links in edges:
         row = []

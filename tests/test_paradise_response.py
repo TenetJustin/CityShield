@@ -31,6 +31,9 @@ def test_evacuation_is_deterministic_and_labelled_simulated():
     )
     assert abs(accounted - first["summary"]["total_population"]) <= 0.3
     assert first["summary"]["still_moving_people"] == 0
+    assert first["summary"]["clearance_status"] in {"complete", "incomplete"}
+    if first["summary"]["clearance_status"] == "incomplete":
+        assert first["summary"]["clearance_minutes"] is None
 
 
 def test_hazard_setting_changes_simulation_identity():
@@ -38,6 +41,7 @@ def test_hazard_setting_changes_simulation_identity():
     without_hazard = paradise_response.simulate_evacuation(LATE, include_fire_hazard=False)
     assert with_hazard["simulation_id"] != without_hazard["simulation_id"]
     assert with_hazard["model_version"] == without_hazard["model_version"]
+    assert with_hazard["fire_hazard"]["forecast_id"]
 
 
 def test_evacuation_pre_share_reduces_late_demand():

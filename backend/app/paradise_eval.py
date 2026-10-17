@@ -400,6 +400,8 @@ def build_evaluation() -> dict[str, Any]:
             "The first five hours of the fire have no FIRMS detections and are not scored.",
             "The 688-minute overnight gap dominates the long-lead bucket; long-lead results are extrapolations.",
             "Weather is a fixed scenario assumption and fuel is a default; the model is uncalibrated.",
+            "All windows come from one incident and are temporally correlated; the configured sample floor is not statistical confidence or independent validation.",
+            "The model parameters have not been frozen and tested on a separate fire, so these scores do not establish cross-incident predictive skill.",
             "NIST observations cannot be scored until their symbols are digitized and reviewed.",
             "Precision and recall answer detection agreement, not life-safety performance.",
         ],

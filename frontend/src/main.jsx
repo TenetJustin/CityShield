@@ -204,7 +204,10 @@ function App() {
     } catch (value) { setError(value.message); }
   }
 
-  useEffect(() => { replay(); return () => eventSource.current?.close(); }, []);
+  useEffect(() => {
+    refreshSystem().catch((value) => setError(value.message));
+    return () => eventSource.current?.close();
+  }, []);
   useEffect(() => {
     if (!playing) return undefined;
     const timer = window.setInterval(() => {
@@ -266,7 +269,7 @@ function App() {
       : `${actions.length} areas need a coordination decision`;
 
   return <main className="appShell">
-    <header className="topbar"><div className="brand"><span className="brandMark">C<span>✦</span></span><div><strong>CityShield</strong><small>WILDFIRE DECISION STUDIO</small></div></div><div className="topActions"><div className="modeSwitch" aria-label="Workspace mode"><button className={viewMode === "live" ? "active" : ""} onClick={() => { setViewMode("live"); setPlaying(false); }}>Legacy live</button><button className={viewMode === "replay" ? "active" : ""} onClick={() => { setViewMode("replay"); setReplayMinute(0); setPlaying(false); }}>Legacy replay</button></div><span className="modeBadge">PARADISE 2018 · ADVISORY ONLY</span><button className="primaryButton" onClick={startStream} disabled={loading}>{loading ? "Receiving data…" : "Run synthetic demo"}</button></div></header>
+    <header className="topbar"><div className="brand"><span className="brandMark">C<span>✦</span></span><div><strong>CityShield</strong><small>WILDFIRE DECISION STUDIO</small></div></div><span className="modeBadge">PARADISE 2018 · ADVISORY ONLY</span></header>
 
     <section className="intro"><div><p className="eyebrow">PARADISE, CALIFORNIA · 2018 HISTORICAL REPLAY · IBM LINUXONE</p><h1>Replay the Camp Fire.<br /><em>Test the forecast.</em></h1></div><div className="introAside"><span className="pulseDot" />Camp Fire 2018 replay · 500 m Paradise grid<small>Real FIRMS observations + NIST time windows · research prototype</small></div></section>
     {error && <div className="error" role="alert">{error}</div>}
@@ -279,6 +282,7 @@ function App() {
 
     <details className="legacyExercise panel">
       <summary><span><b>Synthetic 3×3 exercise (legacy)</b><small>Offline demo, not a historical result. Open only for the original workflow.</small></span><span>Expand +</span></summary>
+    <div className="legacyToolbar"><div className="modeSwitch" aria-label="Legacy exercise mode"><button className={viewMode === "live" ? "active" : ""} onClick={() => { setViewMode("live"); setPlaying(false); }}>Legacy live</button><button className={viewMode === "replay" ? "active" : ""} onClick={() => { setViewMode("replay"); setReplayMinute(0); setPlaying(false); }}>Legacy replay</button></div><button className="primaryButton" onClick={viewMode === "replay" ? replay : startStream} disabled={loading}>{loading ? "Running…" : viewMode === "replay" ? "Run legacy replay" : "Run synthetic stream"}</button></div>
     <nav className="stepNav" aria-label="Decision workflow">{[
       { id: "situation", number: "01", title: "Understand risk", detail: "What is changing?" },
       { id: "scenario", number: "02", title: "Test a scenario", detail: "What if conditions shift?" },

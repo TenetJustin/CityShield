@@ -118,23 +118,23 @@ The replay ID is a hash of the event, data version and the real frame times, so 
 
 | Lead bucket | Windows | Observed new cells | Matched | Evidence | Precision | Recall | IoU |
 | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: |
-| 45–60 min | 6 | 306 | 217 | sufficient | 0.254 | 0.709 | 0.230 |
+| 45–60 min | 6 | 306 | 215 | reporting floor met | 0.259 | 0.703 | 0.234 |
 | 75–180 min | 0 | 0 | 0 | insufficient | — | — | — |
-| over 180 min | 2 | 103 | 102 | insufficient (needs 3 windows) | 0.149 | 0.990 | 0.149 |
+| over 180 min | 2 | 103 | 103 | insufficient (needs 3 windows) | 0.146 | 1.000 | 0.146 |
 
 Short-lead comparison with the isotropic 1.5 km/h radial baseline:
 
 | Variant | Precision | Recall | IoU | Arrival median abs error |
 | --- | ---: | ---: | ---: | ---: |
-| Current wind/slope model | 0.254 | 0.709 | 0.230 | 21 min (217 cells) |
+| Current wind/slope model | 0.259 | 0.703 | 0.234 | 21 min (215 cells) |
 | Radial baseline | 0.195 | 0.967 | 0.194 | not modelled |
 | Persistence baseline | — | 0.000 | 0.000 | not modelled |
 
 The current model has higher precision and IoU than the radial baseline but **lower recall**: the radial baseline over-predicts over a wide area and catches more detections. This is reported as a trade-off, not as a win. The long-lead bucket is over-predicted and is marked **evidence insufficient** because only two windows exist.
 
-Population metrics use the ACS cell totals. For the short bucket the observed exposed population is 11,721 and the predicted exposed population is 16,136 (absolute error 4,415; median per-window relative error 0.131). Nearest miss distance is 604 m; nearest false-alarm distance is 1,266 m.
+Population metrics use the ACS cell totals. For the short bucket the observed exposed population is 11,721 and the predicted exposed population is 17,309 (absolute error 5,588; median per-window relative error 0.275). Nearest miss distance is 604 m; nearest false-alarm distance is 1,266 m.
 
-NIST is not used for spatial scoring. Its symbols are not digitized, and the evaluation package says so. The metrics answer **detection agreement**, not life-safety performance.
+NIST is not used for spatial scoring. Its symbols are not digitized, and the evaluation package says so. The metrics answer **detection agreement**, not life-safety performance. The reporting floor is a configured display rule, not a confidence interval: all windows are correlated observations from the same Camp Fire, and no separately held-out fire has tested model generalization.
 
 ## 9. Forecast API
 
@@ -147,6 +147,8 @@ NIST is not used for spatial scoring. Its symbols are not digitized, and the eva
 - model version, data version, parameter set and limitations.
 
 Scenario query parameters `wind_speed_multiplier`, `wind_direction_delta_deg` and `suppression_effectiveness` change a copy of the forecast; they never change the frozen baseline or the active model.
+
+`wind_from_deg` follows the meteorological convention: it records the direction from which wind arrives, and the spread alignment uses the opposite downwind bearing. The model remains uncalibrated and does not substitute this fixed scenario for a historical station record.
 
 ## 10. Linked 2D / 3D replay console
 

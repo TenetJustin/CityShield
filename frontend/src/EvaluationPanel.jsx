@@ -34,7 +34,7 @@ export default function EvaluationPanel({ evaluation }) {
         return <article className={`prEvalCard ${sufficient ? "sufficient" : "insufficient"}`} key={bucket.id}>
           <div className="prEvalCardTop">
             <div><strong>{bucket.label}</strong><small>{bucket.window_count} window{bucket.window_count === 1 ? "" : "s"} · {bucket.min_minutes}–{bucket.max_minutes >= 100000 ? "∞" : bucket.max_minutes} min lead</small></div>
-            <span className={`prEvidence ${sufficient ? "sufficient" : "insufficient"}`}>{sufficient ? "Evidence sufficient" : "Evidence insufficient"}</span>
+            <span className={`prEvidence ${sufficient ? "sufficient" : "insufficient"}`}>{sufficient ? "Reporting floor met" : "Below reporting floor"}</span>
           </div>
           {bucket.window_count === 0 ? <p className="prEvalEmpty">No forecast windows fell in this lead band. No score is shown.</p> : <>
             <div className="prEvalCounts">
@@ -61,7 +61,7 @@ export default function EvaluationPanel({ evaluation }) {
               </table>
               <p className="prEvalNote">The current model has higher IoU than the radial baseline but lower recall: the radial baseline over-predicts widely and catches more detections. This is a trade-off, not a win.</p>
             </> : <>
-              <p className="prEvalInsufficient">Evidence insufficient: {bucket.evidence.reasons.join("; ")}. No headline score is shown; the raw metrics are available for transparency only.</p>
+              <p className="prEvalInsufficient">Below the configured reporting floor: {bucket.evidence.reasons.join("; ")}. No headline score is shown; the raw metrics are available for transparency only.</p>
               <details className="prRawMetrics"><summary>Raw metrics (not evidence)</summary><div className="prEvalCounts"><span>precision <b>{format(current.precision)}</b></span><span>recall <b>{format(current.recall)}</b></span><span>IoU <b>{format(current.iou)}</b></span><span>arrival <b>{current.arrival_time?.median_abs_error_minutes == null ? "—" : `${current.arrival_time.median_abs_error_minutes} min`}</b></span></div></details>
             </>}
           </>}

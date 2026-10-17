@@ -41,7 +41,7 @@ Population totals are checked for conservation.
 
 ## Known limitations
 
-- Synthetic cells and uncalibrated parameters are used until a city is selected.
+- The Paradise grid is derived from public geography, population and coarse terrain, while fuel, weather and spread parameters remain assumed and uncalibrated.
 - P10/P50/P90 values are ensemble state summaries, not calibrated probabilities.
 - The model does not represent ember transport, crown-fire transition, suppression tactics, smoke chemistry or structure ignition.
 - Route optimization is disabled until an authoritative road graph, closures and capacity assumptions are available.
@@ -50,6 +50,7 @@ Population totals are checked for conservation.
 - Evacuation behaviour, road capacity, reception areas, resource positions and effectiveness are assumed rather than observed.
 - The response model has no historical traffic, order-compliance, shelter-intake, apparatus GPS or rescue-outcome validation.
 - Fire suppression does not feed back into the spread forecast.
+- A reported evacuation clearance time exists only when every modelled person reaches a reception area; otherwise the API reports an incomplete clearance and separately exposes the last successful arrival.
 
 ## Validation required after city selection
 

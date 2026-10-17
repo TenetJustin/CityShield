@@ -238,14 +238,14 @@ export default function EvacuationPanel() {
                 <td>{number(scenario.summary.evacuated_people)}</td>
                 <td>{number(scenario.summary.trapped_people)}</td>
                 <td>{number(scenario.summary.unaccommodated_people)}</td>
-                <td>{scenario.summary.clearance_minutes} min</td>
+                <td>{scenario.summary.clearance_status === "complete" ? `${scenario.summary.clearance_minutes} min` : "incomplete"}</td>
                 <td>{scenario.summary.congestion_index ?? "—"}</td>
                 <td><span className={`evacHazard ${scenario.fire_hazard.status}`}>{hazardLabel(scenario.fire_hazard)}</span></td>
               </tr>)}
             </tbody>
           </table>
         </div>
-        <p className="evacNote">The assumed pre-evacuation share reduces demand in later scenarios. Only the 11:50 scenario has a FIRMS-seeded fire forecast. Zero trapped people in the earlier rows means “hazard not modelled”, not “safe”.</p>
+        <p className="evacNote">The assumed pre-evacuation share reduces demand in later scenarios, so this table is a scenario comparison rather than a causal estimate of an evacuation order. Only the 11:50 scenario has a FIRMS-seeded fire forecast. Zero trapped people in the earlier rows means “hazard not modelled”, not “safe”. “Incomplete” means at least one modelled person did not reach a reception area successfully.</p>
       </div>
 
       <div className="evacCard">
@@ -257,7 +257,8 @@ export default function EvacuationPanel() {
           <div><small>Trapped</small><strong>{number(summary?.trapped_people)}</strong></div>
           <div><small>Unaccommodated</small><strong>{number(summary?.unaccommodated_people)}</strong></div>
           <div><small>Not cleared</small><strong>{number(summary?.un_evacuated_people)}</strong></div>
-          <div><small>Clearance</small><strong>{summary?.clearance_minutes} min</strong></div>
+          <div><small>Clearance</small><strong>{summary?.clearance_status === "complete" ? `${summary.clearance_minutes} min` : "Incomplete"}</strong></div>
+          <div><small>Last successful arrival</small><strong>{summary?.last_successful_arrival_minutes == null ? "—" : `${summary.last_successful_arrival_minutes} min`}</strong></div>
           <div><small>Congestion index</small><strong>{summary?.congestion_index ?? "—"}</strong></div>
         </div>
         <div className="evacShelters">

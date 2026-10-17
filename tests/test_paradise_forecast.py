@@ -11,6 +11,12 @@ client = TestClient(app)
 ISSUE = "2018-11-08T19:50:00Z"
 
 
+def test_meteorological_wind_from_direction_is_reversed_for_downwind_spread():
+    east, north = paradise_forecast._downwind_unit_vector(45)
+    assert east == pytest.approx(-2 ** -0.5)
+    assert north == pytest.approx(-2 ** -0.5)
+
+
 def test_forecast_is_deterministic_and_uses_past_seeds_only():
     first = paradise_forecast.run_forecast(ISSUE, 49)
     second = paradise_forecast.run_forecast(ISSUE, 49)

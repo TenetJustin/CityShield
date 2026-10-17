@@ -430,8 +430,9 @@ button:focus-visible,summary:focus-visible{outline-color:#d7a84b}
 .legacyExercise>summary b{font-size:12px}
 .legacyExercise>summary small,.legacyExercise>summary span:last-child{font-size:9px;color:#8dad9b}
 .legacyExercise[open]>summary{border-bottom:1px solid rgba(228,238,230,.1);margin-bottom:12px}
+.legacyToolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
 .legacyExercise .stepNav{margin-top:0}
-@media(max-width:700px){.legacyExercise{padding:0 12px}}
+@media(max-width:700px){.legacyExercise{padding:0 12px}.legacyToolbar{align-items:stretch;flex-direction:column}.legacyToolbar .modeSwitch{width:100%}.legacyToolbar .modeSwitch button{flex:1}}
 
 /* Simulated evacuation and response. Everything here is scenario data. */
 .evac{margin-top:14px;padding:18px;background:rgba(12,30,22,.55);box-shadow:inset 0 1px 0 rgba(240,255,244,.08),0 0 0 1px rgba(171,222,187,.09)}

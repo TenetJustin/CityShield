@@ -60,6 +60,8 @@ Population accounting follows:
 total = pre-evacuated + evacuated + trapped + unaccommodated + not-cleared
 ```
 
+`clearance_minutes` is populated only when the simulated population is fully cleared. In an incomplete scenario it is `null`; `last_successful_arrival_minutes` remains available and must not be described as clearance time.
+
 An early scenario with no FIRMS-seeded forecast reports `no_forecast`; a zero
 trapped count in that state is not evidence of safety.
 

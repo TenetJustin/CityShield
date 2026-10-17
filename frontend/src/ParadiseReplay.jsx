@@ -354,7 +354,7 @@ export default function ParadiseReplay() {
                 <span><b>{comparisonEvidence.current.recall ?? "—"}</b>recall</span>
                 <span><b>{comparisonEvidence.current.iou ?? "—"}</b>IoU</span>
               </div>
-              <p className={`prEvidenceLine ${comparisonEvidence.evidence.status}`}>{comparisonEvidence.evidence.status === "sufficient" ? "Window has enough samples for a reported score." : `Window evidence insufficient: ${comparisonEvidence.evidence.reasons.join("; ")}`}</p>
+              <p className={`prEvidenceLine ${comparisonEvidence.evidence.status}`}>{comparisonEvidence.evidence.status === "sufficient" ? "Window meets the configured reporting floor; this is not independent validation." : `Window is below the reporting floor: ${comparisonEvidence.evidence.reasons.join("; ")}`}</p>
             </> : <p className="prCardMuted">No evaluated window matches this frame.</p>}
           </>}
         </div>

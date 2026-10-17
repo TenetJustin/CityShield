@@ -16,7 +16,7 @@
     "id_rule": "P-{row:02d}-{col:02d}; row 0 is the southern edge, col 0 is the western edge"
   },
   "forecast": {
-    "model_version": "0.3.0-paradise-cellular-v1",
+    "model_version": "0.3.1-paradise-cellular-v1",
     "members": 24,
     "step_minutes": 10,
     "max_lead_minutes": 720,

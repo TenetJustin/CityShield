@@ -31,7 +31,7 @@ from . import paradise_forecast, paradise_grid, paradise_replay
 
 
 DEFAULT_SEED = 20181108
-MODEL_VERSION = "paradise-response-0.1.0"
+MODEL_VERSION = "paradise-response-0.1.1"
 
 
 def _simulation_id(*parts: object) -> str:
@@ -384,12 +384,17 @@ def simulate_evacuation(
             if minute < platoon["departure"]:
                 continue
             if platoon["walking"]:
+                if burning(platoon["home"], minute):
+                    trapped += platoon["count"]
+                    platoon["count"] = 0.0
+                    released.add(index)
+                    continue
                 external_pending.append({
                     "count": platoon["count"],
                     "shelter_id": platoon["shelter_id"],
                     "people_per_vehicle": 1.0,
                     "home": platoon["home"],
-                    "due": minute,
+                    "due": minute + float(off_grid_minutes.get(platoon["shelter_id"], 0)),
                 })
                 platoon["count"] = 0.0
                 released.add(index)
@@ -491,6 +496,12 @@ def simulate_evacuation(
     )
     unaccommodated_total = unaccommodated + unassigned_people
     un_evacuated = max(0.0, remaining_population - evacuated - unaccommodated_total - trapped)
+    clearance_complete = (
+        trapped <= 0.01
+        and unaccommodated_total <= 0.01
+        and un_evacuated <= 0.01
+        and still_moving + still_walking <= 0.01
+    )
     congestion = vehicle_minutes / free_flow_vehicle_minutes if free_flow_vehicle_minutes else None
     simulation_id = _simulation_id(
         MODEL_VERSION,
@@ -500,6 +511,7 @@ def simulate_evacuation(
         include_fire_hazard,
         max_minutes,
         paradise_grid.grid()["data_version"],
+        hazard_status.get("forecast_id", hazard_status["status"]),
     )
     return {
         "status": "simulated",
@@ -526,7 +538,9 @@ def simulate_evacuation(
             "unaccommodated_people": round(unaccommodated + unassigned_people, 1),
             "trapped_people": round(trapped, 1),
             "still_moving_people": round(still_moving + still_walking, 1),
-            "clearance_minutes": round(last_delivery, 1),
+            "clearance_status": "complete" if clearance_complete else "incomplete",
+            "clearance_minutes": round(last_delivery, 1) if clearance_complete else None,
+            "last_successful_arrival_minutes": round(last_delivery, 1) if evacuated > 0 else None,
             "max_simulation_minutes": max_minutes,
             "vehicle_minutes": round(vehicle_minutes, 1),
             "free_flow_vehicle_minutes": round(free_flow_vehicle_minutes, 1),
@@ -566,6 +580,7 @@ def simulate_evacuation(
             "The shelter assignment is greedy and does not model dynamic rerouting.",
             "People are counted at cell level; no individual or address is used.",
             "Predicted fire arrival can be wrong; blocked edges are scenario consequences.",
+            "Walkers use a straight-line travel estimate and a home-cell fire check; fire exposure along a pedestrian route is not represented.",
         ],
     }
 
@@ -617,14 +632,16 @@ def compare_evacuation(
                 "evacuated_people": result["summary"]["evacuated_people"],
                 "un_evacuated_people": result["summary"]["un_evacuated_people"],
                 "trapped_people": result["summary"]["trapped_people"],
+                "clearance_status": result["summary"]["clearance_status"],
                 "clearance_minutes": result["summary"]["clearance_minutes"],
+                "last_successful_arrival_minutes": result["summary"]["last_successful_arrival_minutes"],
                 "congestion_index": result["summary"]["congestion_index"],
             }
             for result in results
         ],
         "assumptions": [
             "All order times are scenario assumptions, not the actual Camp Fire order history.",
-            "The same seed and population are used; differences come from the order time and the forecast available then.",
+            "The same seed and base population are used, but later times also apply an assumed linear pre-evacuation share and may have different forecast availability; the comparison is not a causal estimate of an order-time effect.",
             "Shelters and capacities are simulated staging areas.",
         ],
     }

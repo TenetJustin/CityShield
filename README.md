@@ -23,11 +23,10 @@ It implements a transparent **Detect → Decide → Respond** loop:
 - The **data quality report** (`data/paradise/data_quality_report.json`) declares 11 pass, 8 warn, 4 blocked and 3 context checks. Blocked layers are NIST spatial extraction, fuel, water and critical facilities. The website shows the same machine-readable report.
 - The **ACS 2013–2017 population** layer allocates 21,785 people to the town clip, 17.6% below the ACS place estimate; it contains no resident locations.
 - The **real replay** has 14 frames (9 FIRMS observations, 5 NIST boundaries), 591 observed cells and no inserted fake frames. The 688-minute overnight gap is preserved.
-- The **strict time-forward evaluation** scores 6 short-lead windows: precision 0.254, recall 0.709, IoU 0.230, arrival median error 21 min. The long-lead bucket has only 2 windows and is marked **evidence insufficient**. NIST is not scored spatially.
+- The **strict time-forward evaluation** scores 6 short-lead windows: precision 0.259, recall 0.703, IoU 0.234, arrival median error 21 min. The long-lead bucket has only 2 windows and is marked **evidence insufficient**. NIST is not scored spatially.
 - The **real replay console** links 2D roads/observed cells/hotspots with a 3D terrain/risk view on one timeline, with play/pause, speed, scrubbing, observation jumps and automatic 2D fallback when WebGL is unavailable.
 - The **response scenario** generates aggregate synthetic residents from ACS cell totals, compares three assumed evacuation-order times, models road-capacity queues and two off-grid reception areas, and allocates six simulated firefighting resources. A shared-grid 2D view shows model routes and simulated deployments; none are observed resident locations, GPS tracks, shelters or dispatches.
-- The legacy synthetic 3×3 exercise is collapsed and labelled; the default page is the real Camp Fire replay.
-- The legacy 3×3 synthetic exercise remains available for offline judging and is labelled synthetic everywhere; it is not a historical result.
+- The legacy synthetic 3×3 exercise is collapsed and labelled; the default page is the Camp Fire FIRMS/NIST replay.
 - The backend and demo run on IBM LinuxONE with the included UBI container definition.
 - Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.
 - What-if runs share the frozen baseline evidence snapshot and return a paired simulation ID.
