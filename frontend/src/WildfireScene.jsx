@@ -3,10 +3,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const COLORS = {
-  low: 0x245f4d,
-  watch: 0xbda449,
-  elevated: 0xee8139,
-  severe: 0xe5422d,
+  low: 0x356f56,
+  watch: 0x92783a,
+  elevated: 0xd7a84b,
+  severe: 0xb05a24,
 };
 
 function riskColor(risk) {
@@ -45,8 +45,8 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
     }
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b1b19);
-    scene.fog = new THREE.Fog(0x0b1b19, 13, 28);
+    scene.background = new THREE.Color(0x102d22);
+    scene.fog = new THREE.Fog(0x102d22, 13, 28);
     const camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
     camera.position.set(8, 10, 10);
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -60,18 +60,18 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     mount.appendChild(renderer.domElement);
-    scene.add(new THREE.AmbientLight(0xa8c9ba, 2.1));
-    const sun = new THREE.DirectionalLight(0xffc98d, 2.5);
+    scene.add(new THREE.AmbientLight(0xe4eee6, 1.85));
+    const sun = new THREE.DirectionalLight(0xd7a84b, 2.4);
     sun.position.set(-5, 10, 6);
     scene.add(sun);
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(30, 30),
-      new THREE.MeshStandardMaterial({ color: 0x122d27, roughness: 1 }),
+      new THREE.MeshStandardMaterial({ color: 0x173a2c, roughness: 1 }),
     );
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.07;
     scene.add(ground);
-    const grid = new THREE.GridHelper(22, 22, 0x315b50, 0x22483f);
+    const grid = new THREE.GridHelper(22, 22, 0x527765, 0x294f3d);
     grid.position.y = -0.04;
     scene.add(grid);
 
@@ -158,7 +158,7 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
       const elevation = 0.25 + Math.max(0, Math.min(1, cell.slope || 0)) * 0.9;
       const material = new THREE.MeshStandardMaterial({
         color: riskColor(cell.risk), roughness: 0.78, metalness: 0.02,
-        emissive: cell.id === selectedCell ? 0x276d67 : 0x000000,
+        emissive: cell.id === selectedCell ? 0xb05a24 : 0x000000,
         emissiveIntensity: 0.55,
       });
       const tile = new THREE.Mesh(new THREE.BoxGeometry(1.7, elevation, 1.7), material);
@@ -172,7 +172,7 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
       borderSource.dispose();
       const border = new THREE.LineSegments(
         borderGeometry,
-        new THREE.LineBasicMaterial({ color: cell.id === selectedCell ? 0xf6f3cb : 0x5f8879 }),
+        new THREE.LineBasicMaterial({ color: cell.id === selectedCell ? 0xe4eee6 : 0x719180 }),
       );
       border.position.copy(tile.position);
       model.add(border);
@@ -184,7 +184,7 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
           const flame = new THREE.Mesh(
             new THREE.ConeGeometry(0.12 + cell.risk * 0.14, height, 5),
             new THREE.MeshBasicMaterial({
-              color: index === 0 ? 0xffd56b : 0xff673d,
+              color: index === 0 ? 0xd7a84b : 0xb05a24,
               transparent: true, opacity: 0.92,
             }),
           );
