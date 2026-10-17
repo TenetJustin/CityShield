@@ -7,10 +7,12 @@ CityShield separates a reliable competition demonstration from claims that requi
 | Level | Required evidence | Current state | Allowed claim |
 | --- | --- | --- | --- |
 | Competition demo | Deterministic offline replay, forecast, decision, audit and UI | Ready | Working research prototype |
-| Historical validation | One independent incident with time-aligned hotspot, perimeter, weather and outcome data | Awaiting city | Historical replay and measured model skill |
-| Live city pilot | Monitored feeds, spatial mapper, freshness alarms and rehearsed fallback | Awaiting city | Live advisory feed, never an official warning |
+| Historical validation | One independent incident with time-aligned hotspot, perimeter, weather and outcome data | Paradise selected; data extraction and evaluation pending | Historical replay and measured model skill |
+| Live city pilot | Monitored feeds, spatial mapper, freshness alarms and rehearsed fallback | Paradise public map, weather and incident queries integrated; prediction and response gates pending | Live advisory feed, never an official warning |
 
 The `GET /api/v1/delivery/readiness` endpoint exposes these gates to the console. The bundled `GET /api/v1/demo/incident` package is deliberately synthetic, versionable and offline-safe.
+
+The separate Paradise panel is documented in [its source manifest](../data/paradise/SOURCES.md). It does not alter the synthetic exercise or imply that the live-city gate has passed.
 
 ## Dataset acceptance checklist
 
