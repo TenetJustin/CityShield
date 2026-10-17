@@ -18,6 +18,10 @@ from .audit import AuditLog
 from .config import load_city_config, readiness
 from .decision import DecisionService
 from .demo import demo_incident, demo_observations
+from .history import (
+    load_firms_history as paradise_firms_history,
+    load_population_exposure as paradise_population_exposure,
+)
 from .paradise import (
     geography as paradise_geography,
     historical_final_perimeter as paradise_historical_final,
@@ -144,6 +148,16 @@ def paradise_geography_data():
 @app.get("/api/v1/paradise/history/camp-fire-final")
 def paradise_camp_fire_final():
     return paradise_historical_final()
+
+
+@app.get("/api/v1/paradise/history/firms")
+def paradise_camp_fire_firms():
+    return paradise_firms_history()
+
+
+@app.get("/api/v1/paradise/exposure/population")
+def paradise_population():
+    return paradise_population_exposure()
 
 
 @app.get("/api/v1/paradise/terrain")

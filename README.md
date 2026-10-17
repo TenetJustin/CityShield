@@ -61,6 +61,20 @@ The Paradise public-data panel is available without a NASA key. The API paths
 See [Paradise sources and acceptance gaps](data/paradise/SOURCES.md). The live
 panel is not a validated fire prediction or official emergency service.
 
+To build the two frozen historical inputs without storing credentials in the
+repository, export the free provider keys in your shell and run:
+
+```bash
+export FIRMS_MAP_KEY="..."
+python scripts/build_paradise_firms_history.py
+export CENSUS_API_KEY="..."
+python scripts/build_paradise_population.py
+```
+
+The builders write source metadata and explicit quality gates. FIRMS points are
+not treated as perimeters, and ACS area estimates are not treated as resident
+locations.
+
 ## Run the demo
 
 ```bash

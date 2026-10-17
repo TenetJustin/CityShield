@@ -58,3 +58,30 @@ into that exercise or treated as a validated spread prediction.
 5. Test feed freshness, outage behavior, security, accessibility and human
    approval with the responsible Paradise/Butte County agencies before any
    public-safety deployment. The application cannot issue official orders.
+
+## Reproducible FIRMS history build
+
+`scripts/build_paradise_firms_history.py` downloads NASA FIRMS standard-
+processing VIIRS detections for November 8–9, 2018 from both S-NPP and NOAA-20.
+It removes duplicate detections, validates required fields and coordinates,
+and requires at least four unique acquisition times before marking the frozen
+package acceptable for historical replay. Configure `FIRMS_MAP_KEY` only in
+the environment; the key is never stored in the generated JSON or logs.
+
+The generated `camp_fire_firms_2018.json` remains an observation-point layer.
+It must be compared with the independent NIST fire-progression reconstruction
+and must not be presented as an authoritative perimeter.
+
+## Historical population exposure build
+
+`scripts/build_paradise_population.py` joins the 2017 Census block-group
+geography with 2013–2017 ACS five-year total-population estimates, clips the
+result to the official 2018 Paradise place boundary, and records source hashes,
+coverage, missing joins and sampling margins of error. The output is an
+area-weighted exposure estimate for the Camp Fire replay. It contains no
+addresses, live occupancy, household records or individual resident locations.
+
+Configure `CENSUS_API_KEY` only in the environment. The key is never stored in
+the generated file. Until the quality report reports full boundary coverage and
+no missing population joins, the exposure layer must remain blocked from model
+claims.
