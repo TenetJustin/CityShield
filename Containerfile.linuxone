@@ -1,5 +1,6 @@
-FROM docker.io/library/node:22-bookworm-slim AS frontend-builder
+FROM registry.access.redhat.com/ubi9/nodejs-22:latest AS frontend-builder
 
+USER 0
 WORKDIR /build/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci

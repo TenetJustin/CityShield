@@ -39,7 +39,7 @@ If `podman` or `git` is missing on RHEL, install it with `sudo dnf install -y po
 The API has unauthenticated demo write endpoints. Keep port 8000 bound to `127.0.0.1` until TLS and access control are configured. To view the full site securely from your Mac, open another local terminal:
 
 ```bash
-ssh -i ~/.ssh/cityshield_linuxone -o IdentitiesOnly=yes -N \
+ssh -i ~/.ssh/cityshield_linuxone -o IdentitiesOnly=yes \
   -L 8000:127.0.0.1:8000 linux1@<VM_IP>
 ```
 
