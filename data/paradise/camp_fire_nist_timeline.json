@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "event_id": "camp-fire-2018",
+  "source_owner": "National Institute of Standards and Technology",
+  "source_report": "NIST Technical Note 2135",
+  "source_doi": "https://doi.org/10.6028/NIST.TN.2135",
+  "timezone": "America/Los_Angeles",
+  "windows": [
+    {
+      "id": "nist-map-2",
+      "start_at": "2018-11-08T06:25:00-08:00",
+      "end_at": "2018-11-08T07:45:00-08:00",
+      "source_url": "https://www.nist.gov/document/map-2",
+      "sha256": "20aa9799c882d11926d9b2d297ba3e37dc4f93671781960ab5a44970f78875e2"
+    },
+    {
+      "id": "nist-map-3",
+      "start_at": "2018-11-08T07:45:00-08:00",
+      "end_at": "2018-11-08T08:30:00-08:00",
+      "source_url": "https://www.nist.gov/document/map-3",
+      "sha256": "a99167c16f4449e53f8ffd9bca5a3ebe940572642e2bd2065b0e34e451c85d1e"
+    },
+    {
+      "id": "nist-map-4",
+      "start_at": "2018-11-08T08:30:00-08:00",
+      "end_at": "2018-11-08T09:00:00-08:00",
+      "source_url": "https://www.nist.gov/document/map-4",
+      "sha256": "1f113b4b0c111f717871b8e322f365ad3209206c88f7f71ab1c6c29143358bec"
+    },
+    {
+      "id": "nist-map-5",
+      "start_at": "2018-11-08T09:00:00-08:00",
+      "end_at": "2018-11-08T10:00:00-08:00",
+      "source_url": "https://www.nist.gov/document/map-5",
+      "sha256": "c84c2de253bc7fd211d6cc12dd6f75d3983bbbabf6ed8bbbc0b10c89e3138673"
+    }
+  ],
+  "quality": {
+    "time_windows": 4,
+    "continuous_from": "2018-11-08T06:25:00-08:00",
+    "continuous_to": "2018-11-08T10:00:00-08:00",
+    "source_files_verified": true,
+    "accepted_for_visual_validation": true,
+    "accepted_for_model_scoring": false,
+    "blocking_item": "Observation symbols have not yet been reviewed and digitized into geospatial records."
+  },
+  "limitations": [
+    "The PDF maps are authoritative reconstruction products, but this manifest contains time windows and file identities only.",
+    "Model scoring remains blocked until observations are digitized with a documented positional-error estimate.",
+    "Faded symbols on later maps represent prior observations and must not be counted as new observations."
+  ]
+}

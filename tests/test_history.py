@@ -52,3 +52,14 @@ def test_missing_population_package_is_reported_without_inventing_data(monkeypat
     assert result["status"] == "not_built"
     assert result["accepted_for_area_exposure"] is False
     assert "package" not in result
+
+
+def test_nist_timeline_has_four_continuous_verified_windows():
+    result = history.load_nist_timeline()
+    package = result["package"]
+    assert result["accepted_for_visual_validation"] is True
+    assert result["accepted_for_model_scoring"] is False
+    assert len(package["windows"]) == 4
+    assert all(len(window["sha256"]) == 64 for window in package["windows"])
+    for previous, current in zip(package["windows"], package["windows"][1:]):
+        assert previous["end_at"] == current["start_at"]

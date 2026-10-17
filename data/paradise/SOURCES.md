@@ -72,6 +72,12 @@ The generated `camp_fire_firms_2018.json` remains an observation-point layer.
 It must be compared with the independent NIST fire-progression reconstruction
 and must not be presented as an authoritative perimeter.
 
+`camp_fire_nist_timeline.json` records four continuous NIST observation-map
+windows from 06:25 through 10:00 PST and the verified SHA-256 identity of every
+source PDF. This is sufficient for source-backed visual validation. Numerical
+model scoring remains blocked until the map observations are digitized and
+reviewed with a documented positional-error estimate.
+
 ## Historical population exposure build
 
 `scripts/build_paradise_population.py` joins the 2017 Census block-group

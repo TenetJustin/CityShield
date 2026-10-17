@@ -7,6 +7,7 @@ Interactive OpenAPI documentation is available at `/docs` while the backend is r
 | `GET /health` | Process health and deployed model version |
 | `GET /api/v1/readiness` | Platform readiness and remaining city-specific blockers |
 | `GET /api/v1/paradise/history/firms` | Frozen 2018 FIRMS package and its data-quality gate |
+| `GET /api/v1/paradise/history/nist-timeline` | Verified NIST Camp Fire observation windows and scoring gate |
 | `GET /api/v1/paradise/exposure/population` | Pre-fire ACS area-level exposure package and quality gate |
 | `GET /api/v1/sources` | Adapter, credential and city-dependency status |
 | `GET /api/v1/state` | Current belief state and recent observations |

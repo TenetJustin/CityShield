@@ -12,6 +12,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 PARADISE_FIRMS_HISTORY = ROOT / "data" / "paradise" / "camp_fire_firms_2018.json"
 PARADISE_POPULATION = ROOT / "data" / "paradise" / "population_acs_2017_block_groups.geojson"
+PARADISE_NIST_TIMELINE = ROOT / "data" / "paradise" / "camp_fire_nist_timeline.json"
 REQUIRED_DETECTION_FIELDS = (
     "latitude",
     "longitude",
@@ -140,5 +141,18 @@ def load_population_exposure() -> dict[str, Any]:
     return {
         "status": "ready" if accepted else "quality_blocked",
         "accepted_for_area_exposure": accepted,
+        "package": package,
+    }
+
+
+def load_nist_timeline() -> dict[str, Any]:
+    package = json.loads(PARADISE_NIST_TIMELINE.read_text(encoding="utf-8"))
+    quality = package.get("quality", {})
+    return {
+        "status": "visual_validation_ready"
+        if quality.get("accepted_for_visual_validation")
+        else "quality_blocked",
+        "accepted_for_visual_validation": bool(quality.get("accepted_for_visual_validation")),
+        "accepted_for_model_scoring": bool(quality.get("accepted_for_model_scoring")),
         "package": package,
     }

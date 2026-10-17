@@ -20,6 +20,7 @@ from .decision import DecisionService
 from .demo import demo_incident, demo_observations
 from .history import (
     load_firms_history as paradise_firms_history,
+    load_nist_timeline as paradise_nist_timeline,
     load_population_exposure as paradise_population_exposure,
 )
 from .paradise import (
@@ -153,6 +154,11 @@ def paradise_camp_fire_final():
 @app.get("/api/v1/paradise/history/firms")
 def paradise_camp_fire_firms():
     return paradise_firms_history()
+
+
+@app.get("/api/v1/paradise/history/nist-timeline")
+def paradise_camp_fire_nist_timeline():
+    return paradise_nist_timeline()
 
 
 @app.get("/api/v1/paradise/exposure/population")
