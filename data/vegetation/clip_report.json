@@ -1,0 +1,29 @@
+{
+  "source": "LANDFIRE LF2016_EVT_CONUS/Tif/LF2016_EVT_CONUS.tif",
+  "grid_version": "paradise-500m-v1",
+  "grid_file": "paradise_grid_500m.json",
+  "aoi_bounds_wgs84": [
+    -121.694159,
+    39.698087,
+    -121.524756,
+    39.829221
+  ],
+  "output_crs": "EPSG:5070",
+  "resolution_native_units": [
+    30.0,
+    30.0
+  ],
+  "shape": [
+    601,
+    593
+  ],
+  "nodata": 32767.0,
+  "nodata_pixels": 0,
+  "method": "Native-resolution rectangular window covering all grid cells; no resampling. Includes pixels outside grid at rectangle edges.",
+  "limitations": [
+    "Circa-2016 vegetation proxy for 2018; not a fuel model.",
+    "Category codes are labels, not numeric fuel intensity."
+  ],
+  "unmatched_category_codes": [],
+  "output_bytes": 152363
+}
