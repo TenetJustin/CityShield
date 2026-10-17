@@ -24,7 +24,7 @@ wait_for_health() {
 }
 
 run_production() {
-  podman run -d --name cityshield --restart=unless-stopped \
+  podman run -d --name cityshield-api --restart=unless-stopped \
     -p 127.0.0.1:8000:8000 \
     -v "cityshield-runtime:$runtime_path" \
     "$1"
@@ -48,12 +48,12 @@ python3 scripts/smoke_test.py http://127.0.0.1:18001
 cleanup
 trap - EXIT
 
-previous_image=$(podman inspect --format '{{.Image}}' cityshield 2>/dev/null || true)
-podman rm -f cityshield >/dev/null 2>&1 || true
+previous_image=$(podman inspect --format '{{.Image}}' cityshield-api 2>/dev/null || true)
+podman rm -f cityshield-api >/dev/null 2>&1 || true
 
 if ! run_production "$image" || ! wait_for_health 8000; then
   echo "New container failed. Restoring the previous image..." >&2
-  podman rm -f cityshield >/dev/null 2>&1 || true
+  podman rm -f cityshield-api >/dev/null 2>&1 || true
   if [[ -n $previous_image ]]; then
     run_production "$previous_image"
   fi
