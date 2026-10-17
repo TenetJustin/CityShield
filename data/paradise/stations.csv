@@ -1,0 +1,4 @@
+﻿station_id,latitude,longitude,Datum,State Name,County Name,Parameter Code,Parameter Name,POC,Method Code,Method Name,Units of Measure
+06-007-0008,39.76168,-121.84047,NAD83,California,Butte,88502,Acceptable PM2.5 AQI & Speciation Mass,3,731,Met-One BAM-1020 W/PM2.5 SCC - Beta Attenuation,Micrograms/cubic meter (LC)
+06-007-2002,39.77919,-121.59135,NAD83,California,Butte,88502,Acceptable PM2.5 AQI & Speciation Mass,3,171,Met-one BAM-1022 W/PM2.5 SCC - Beta Attenuation,Micrograms/cubic meter (LC)
+06-007-4001,39.327563,-121.668811,WGS84,California,Butte,88502,Acceptable PM2.5 AQI & Speciation Mass,3,731,Met-One BAM-1020 W/PM2.5 SCC - Beta Attenuation,Micrograms/cubic meter (LC)
