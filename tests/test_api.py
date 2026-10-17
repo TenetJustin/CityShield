@@ -17,6 +17,23 @@ def test_demo_end_to_end():
     assert payload["forecast"]["latency_ms"] >= 0
 
 
+def test_offline_incident_contract_and_delivery_gate():
+    incident = client.get("/api/v1/demo/incident")
+    assert incident.status_code == 200
+    payload = incident.json()
+    assert payload["offline_ready"] is True
+    assert [frame["minute"] for frame in payload["frames"]] == [0, 30, 60, 120]
+    assert payload["quality"]["label"].startswith("Synthetic")
+
+    readiness = client.get("/api/v1/delivery/readiness")
+    assert readiness.status_code == 200
+    status = readiness.json()
+    assert status["competition_demo_ready"] is True
+    assert status["offline_replay_ready"] is True
+    assert status["live_city_ready"] is False
+    assert all(item["fallback"] for item in status["datasets"])
+
+
 def test_rsi_is_shadow_only():
     client.post("/api/v1/demo/reset")
     client.post("/api/v1/demo/replay")

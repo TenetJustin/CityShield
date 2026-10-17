@@ -32,6 +32,8 @@ flowchart TB
 
   H --> UI[React decision console]
   UI --> H
+  A --> R[Incident replay: observed vs predicted]
+  R --> UI
 ```
 
 The real-time and RSI paths are deliberately separated. Detect/Decide/Respond stays deterministic for a frozen evidence snapshot; RSI only consumes completed-event outcomes and may propose a versioned shadow candidate.
@@ -53,6 +55,10 @@ The API, stream/replay processor, state estimator, ensemble forecast, decision e
 `evidence_snapshot_id → forecast_run_id → simulation_run_id → decision_run_id → audit hash`
 
 Every recommendation can therefore be traced to a frozen set of observations, model/config version, scenario and human review. A duplicate observation is ignored by its provider identity rather than silently changing the state twice.
+
+## Delivery boundary
+
+The live-data path is an enhancement rather than a single point of failure. The competition path uses the same contracts with a versioned offline incident package. The interface labels live, cached, historical and synthetic modes explicitly; source failure can degrade to replay but cannot silently change provenance.
 
 ## Remaining city-specific boundary
 

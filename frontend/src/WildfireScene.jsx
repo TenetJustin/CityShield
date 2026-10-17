@@ -24,7 +24,15 @@ function disposeObject(object) {
   });
 }
 
-export default function WildfireScene({ cells, selectedCell, onSelect, resetSignal }) {
+export default function WildfireScene({
+  cells,
+  selectedCell,
+  onSelect,
+  resetSignal,
+  showObserved = false,
+  showHotspots = false,
+  resources = [],
+}) {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const onSelectRef = useRef(onSelect);
@@ -75,7 +83,7 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
     grid.position.y = -0.04;
     scene.add(grid);
 
-    const state = { scene, camera, controls, renderer, model: null, tiles: [], flames: [] };
+    const state = { scene, camera, controls, renderer, model: null, tiles: [], flames: [], hotspots: [] };
     sceneRef.current = state;
     let pointerDown = null;
     const raycaster = new THREE.Raycaster();
@@ -106,19 +114,23 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
     observer.observe(mount);
     resize();
 
-    const clock = new THREE.Clock();
+    const animationStartedAt = performance.now();
     let frame;
-    const animate = () => {
-      const time = clock.getElapsedTime();
+    const animate = (timestamp) => {
+      const time = (timestamp - animationStartedAt) / 1000;
       state.flames.forEach((flame, index) => {
         flame.scale.y = flame.userData.baseScale * (0.88 + Math.sin(time * 5 + index) * 0.12);
         flame.rotation.y += 0.01;
+      });
+      state.hotspots.forEach((hotspot, index) => {
+        const pulse = 0.85 + Math.sin(time * 4.5 + index) * 0.2;
+        hotspot.scale.setScalar(pulse);
       });
       controls.update();
       renderer.render(scene, camera);
       frame = requestAnimationFrame(animate);
     };
-    animate();
+    frame = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(frame);
@@ -147,6 +159,7 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
     const model = new THREE.Group();
     const tiles = [];
     const flames = [];
+    const hotspots = [];
     const rows = cells.map((cell) => cell.row);
     const cols = cells.map((cell) => cell.col);
     const centerRow = rows.length ? (Math.min(...rows) + Math.max(...rows)) / 2 : 1;
@@ -177,6 +190,35 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
       border.position.copy(tile.position);
       model.add(border);
 
+      if (showObserved && cell.observed) {
+        const observedTop = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.48, 1.48),
+          new THREE.MeshBasicMaterial({ color: 0xffdac1, transparent: true, opacity: 0.36, side: THREE.DoubleSide }),
+        );
+        observedTop.rotation.x = -Math.PI / 2;
+        observedTop.position.set(x, elevation + 0.025, z);
+        model.add(observedTop);
+        const observedBox = new THREE.BoxGeometry(1.55, 0.06, 1.55);
+        const observedEdges = new THREE.EdgesGeometry(observedBox);
+        observedBox.dispose();
+        const ring = new THREE.LineSegments(
+          observedEdges,
+          new THREE.LineBasicMaterial({ color: 0xff8a42 }),
+        );
+        ring.position.set(x, elevation + 0.04, z);
+        model.add(ring);
+      }
+
+      if (showHotspots && cell.hotspot) {
+        const hotspot = new THREE.Mesh(
+          new THREE.SphereGeometry(0.18, 16, 12),
+          new THREE.MeshBasicMaterial({ color: 0xffcf5a }),
+        );
+        hotspot.position.set(x, elevation + 0.42, z);
+        model.add(hotspot);
+        hotspots.push(hotspot);
+      }
+
       if (cell.risk >= 0.08) {
         const count = cell.risk >= 0.6 ? 3 : cell.risk >= 0.3 ? 2 : 1;
         for (let index = 0; index < count; index += 1) {
@@ -195,11 +237,31 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
         }
       }
     });
+
+    resources.forEach((resource, index) => {
+      const cell = cells.find((item) => item.id === resource.cell_id);
+      if (!cell) return;
+      const x = (cell.col - centerCol) * 1.85 + 0.48;
+      const z = (cell.row - centerRow) * 1.85 - 0.48;
+      const elevation = 0.25 + Math.max(0, Math.min(1, cell.slope || 0)) * 0.9;
+      const geometry = resource.kind === "drone"
+        ? new THREE.OctahedronGeometry(0.24, 0)
+        : new THREE.BoxGeometry(0.42, 0.26, 0.28);
+      const marker = new THREE.Mesh(
+        geometry,
+        new THREE.MeshStandardMaterial({ color: resource.kind === "drone" ? 0xe4eee6 : 0x6fbf91, emissive: 0x183c2a, emissiveIntensity: 0.35 }),
+      );
+      marker.position.set(x, elevation + (resource.kind === "drone" ? 1.1 : 0.24), z);
+      marker.userData.resourceId = resource.resource_id;
+      marker.rotation.y = index * 0.7;
+      model.add(marker);
+    });
     state.model = model;
     state.tiles = tiles;
     state.flames = flames;
+    state.hotspots = hotspots;
     state.scene.add(model);
-  }, [cells, selectedCell]);
+  }, [cells, selectedCell, showObserved, showHotspots, resources]);
 
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -215,6 +277,7 @@ export default function WildfireScene({ cells, selectedCell, onSelect, resetSign
       {!supported && <div className="sceneFallback">This browser cannot display WebGL. Use the risk list below.</div>}
       {!cells.length && <div className="sceneFallback">Start the demo to see the wildfire world state.</div>}
       <div className="sceneHint">Drag to rotate · Scroll to zoom · Click a cell</div>
+      {(showObserved || showHotspots || resources.length > 0) && <div className="sceneStatus">{showObserved ? "Observed edge" : ""}{showObserved && (showHotspots || resources.length) ? " · " : ""}{showHotspots ? "Thermal hotspots" : ""}{showHotspots && resources.length ? " · " : ""}{resources.length ? `${resources.length} resources` : ""}</div>}
     </div>
   );
 }

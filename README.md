@@ -21,6 +21,8 @@ It implements a transparent **Detect → Decide → Respond** loop:
 - Controlled RSI can score an incident and create a shadow candidate, but cannot silently change the active model.
 - What-if runs share the frozen baseline evidence snapshot and return a paired simulation ID.
 - The console has an interactive 3D synthetic terrain, animated forecast timeline, four risk bands and a guided Understand → Test → Review workflow.
+- A FireTrace-inspired incident-replay mode separates observed edge, hotspot, resources and forecast layers, with actual-versus-predicted comparison.
+- The judging path is offline-safe: a labelled cached exercise, delivery gates and source fallbacks keep the full demo runnable without external APIs.
 - The remaining blockers are deliberately city-specific: selecting the city, replacing the synthetic grid, and mapping authoritative local data.
 
 ## Run locally
@@ -44,6 +46,8 @@ npm run dev
 ```bash
 curl -X POST http://localhost:8000/api/v1/demo/reset
 curl -X POST http://localhost:8000/api/v1/demo/replay
+curl http://localhost:8000/api/v1/demo/incident
+curl http://localhost:8000/api/v1/delivery/readiness
 curl http://localhost:8000/api/v1/predict
 curl -X POST http://localhost:8000/api/v1/decisions/recommend
 ```
@@ -73,6 +77,7 @@ The automated suite covers temporal visibility, ingestion idempotency, determini
 - [Model card and limitations](docs/MODEL_CARD.md)
 - [LinuxONE deployment](docs/DEPLOY_LINUXONE.md)
 - [Real-data integration runbook](docs/REAL_DATA_INTEGRATION.md)
+- [Data and delivery gates](docs/DELIVERY_GATES.md)
 - [Datathon demo script](docs/DEMO_SCRIPT.md)
 - [Submission checklist](docs/SUBMISSION.md)
 - [Front-end functions and layout](docs/FRONTEND_EXPERIENCE.md)

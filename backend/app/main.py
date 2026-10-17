@@ -12,10 +12,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 
 from .adapters import source_registry
+from .adapters.registry import delivery_readiness
 from .audit import AuditLog
 from .config import load_city_config, readiness
 from .decision import DecisionService
-from .demo import demo_observations
+from .demo import demo_incident, demo_observations
 from .rsi import ControlledRSI
 from .schemas import (
     DecisionOutcome,
@@ -132,6 +133,11 @@ def sources():
         "sources": source_registry(config.get("city_id") != "TBD_US_CITY"),
         "policy": "Unavailable sources fail visibly; synthetic data is never labeled live.",
     }
+
+
+@app.get("/api/v1/delivery/readiness")
+def delivery_status():
+    return delivery_readiness(config.get("city_id") != "TBD_US_CITY")
 
 
 @app.get("/api/v1/state")
@@ -310,6 +316,11 @@ def reset_demo():
     for key in metrics:
         metrics[key] = None if key == "last_forecast_latency_ms" else 0
     return {"reset": True}
+
+
+@app.get("/api/v1/demo/incident")
+def incident_demo():
+    return demo_incident()
 
 
 @app.post("/api/v1/demo/replay")

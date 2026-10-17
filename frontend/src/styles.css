@@ -123,6 +123,31 @@ button:focus-visible,summary:focus-visible{
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.panel,.introAside,.stepNav{background:var(--glass-face-strong)}}
 
+.modeSwitch{display:flex;padding:3px;border-radius:9px;background:rgba(228,238,230,.055);box-shadow:inset 0 0 0 1px rgba(228,238,230,.1)}
+.modeSwitch button{border:0;border-radius:7px;padding:7px 10px;background:transparent;color:#8eaa99;font-size:10px;font-weight:800;white-space:nowrap}
+.modeSwitch button.active{background:rgba(176,90,36,.24);color:#ffe7d4;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 0 0 1px rgba(176,90,36,.3)}
+.layerBar{display:flex;flex-wrap:wrap;gap:7px;margin:-3px 0 12px}
+.layerBar button{display:flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:7px 10px;background:rgba(228,238,230,.055);color:#8eaa99;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(228,238,230,.1);font-size:10px;font-weight:750}
+.layerBar button i{width:7px;height:7px;border-radius:50%;background:#557365}
+.layerBar button.active{color:#f5e5cf;background:rgba(176,90,36,.15);box-shadow:inset 0 1px 0 rgba(255,235,220,.12),0 0 0 1px rgba(176,90,36,.32)}
+.layerBar button.active i{background:#d7a84b;box-shadow:0 0 9px rgba(215,168,75,.65)}
+.qualityRibbon{display:flex;align-items:center;gap:9px;margin:0 0 12px;padding:9px 11px;border-radius:8px;background:rgba(215,168,75,.08);box-shadow:inset 0 0 0 1px rgba(215,168,75,.17);font-size:10px}
+.qualityRibbon strong{color:#edc77c;white-space:nowrap}.qualityRibbon span{color:#9db2a4}
+.sceneStatus{position:absolute;right:13px;top:12px;padding:7px 9px;border-radius:7px;background:rgba(13,36,27,.72);color:#e9d5b2;font-size:9px;pointer-events:none;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 0 1px rgba(228,238,230,.1)}
+.eventTrack{display:flex;justify-content:space-between;gap:8px;margin:13px 0 0;padding-top:11px;border-top:1px solid rgba(228,238,230,.09)}
+.eventTrack span{display:flex;align-items:center;gap:5px;color:#648172;font-size:8px;white-space:nowrap}.eventTrack span i{width:6px;height:6px;border-radius:50%;background:#3f5d4d}.eventTrack span.reached{color:#d8c092}.eventTrack span.reached i{background:#b05a24;box-shadow:0 0 8px rgba(176,90,36,.75)}
+.legend .observed{background:#ff8a42}.legend .hotspot{background:#ffcf5a;box-shadow:0 0 7px rgba(255,207,90,.7)}
+.replaySummary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}.replaySummary span{display:grid;gap:2px;padding:9px;border-radius:8px;background:rgba(228,238,230,.045);box-shadow:inset 0 0 0 1px rgba(228,238,230,.08);color:#839e8f;font-size:8px}.replaySummary b{color:#e4eee6;font-size:13px}
+.deliveryBanner{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:15px 0;border-top:1px solid rgba(195,231,206,.1)}
+.deliveryBanner>div{display:grid;grid-template-columns:auto 1fr;column-gap:8px;row-gap:3px;padding:11px;border-radius:9px;background:rgba(228,238,230,.045);box-shadow:inset 0 0 0 1px rgba(228,238,230,.08)}
+.deliveryBanner strong{font-size:11px}.deliveryBanner small{grid-column:2;color:#8ea99a;font-size:9px;line-height:1.4}
+.statusDot{display:inline-block;width:8px;height:8px;margin-top:2px;border-radius:50%;background:#687d71}.statusDot.pass{background:#69b685;box-shadow:0 0 8px rgba(105,182,133,.55)}.statusDot.review{background:#d7a84b}.statusDot.blocked{background:#b05a24}
+.gateRow{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:8px 0;border-bottom:1px solid rgba(195,231,206,.1)}.gateRow>div{display:grid;gap:3px}.gateRow strong{font-size:10px}.gateRow small{color:#8ea99a;font-size:9px;line-height:1.35}
+.evidenceGrid{grid-template-columns:repeat(4,1fr)}
+
+@media(max-width:1180px){.topActions{flex-wrap:wrap;justify-content:flex-end}.evidenceGrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.modeSwitch{order:3;width:100%}.modeSwitch button{flex:1}.qualityRibbon{align-items:flex-start;flex-direction:column}.eventTrack{overflow-x:auto;justify-content:flex-start;padding-bottom:3px}.eventTrack span{min-width:max-content}.deliveryBanner,.evidenceGrid{grid-template-columns:1fr}.replaySummary{grid-template-columns:repeat(3,1fr)}}
+
 /* Scheme B — forest, fire and evidence.
    Sand gold is the fourth semantic color: forecast/watch states, never active fire. */
 :root{

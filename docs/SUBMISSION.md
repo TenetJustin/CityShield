@@ -14,13 +14,14 @@
 - [x] Generic FIRMS, NWS and WFIGS adapter code.
 - [x] LinuxONE OCI container, health check and deployment guide.
 - [x] Responsive guided decision console, interactive 3D demonstration, animated risk timeline, automated tests and CI.
+- [x] Offline-safe incident replay with observed/predicted separation, source fallbacks and visible delivery gates.
 - [x] Model card, data contract, security notes and demo script.
 
 ## Blocked only by city selection
 
 - [ ] City boundary, timezone, CRS and area of interest.
 - [ ] Real grid and point/polygon-to-cell mapper.
-- [ ] One complete historical fire incident and replay clock.
+- [ ] One complete independently sourced historical fire incident (the replay clock and synthetic contract are complete).
 - [ ] LANDFIRE/3DEP aggregation and exposure layers.
 - [ ] Authoritative roads, closures, zones and response resources.
 - [ ] Event-level validation and calibrated claims.
