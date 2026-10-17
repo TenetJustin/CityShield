@@ -148,8 +148,27 @@ NIST is not used for spatial scoring. Its symbols are not digitized, and the eva
 
 Scenario query parameters `wind_speed_multiplier`, `wind_direction_delta_deg` and `suppression_effectiveness` change a copy of the forecast; they never change the frozen baseline or the active model.
 
-## 10. Remaining work for phase 5–6
+## 10. Linked 2D / 3D replay console
 
-- Link the real replay into the 2D and 3D console with one shared timeline.
+The site now opens with the real Paradise replay above the legacy synthetic exercise. The 2D and 3D views share:
+
+- the same 841-cell grid and `P-row-col` IDs;
+- the same selected replay frame and real UTC/PT time;
+- the same forecast object, lead time and scenario;
+- the same observed-cell set, hotspot set and predicted probabilities;
+- the same population exposure and source labels.
+
+2D view: real TIGER roads, town boundary, observed FIRMS cells, new hotspots sized by FRP, predicted risk cells, population bars and a cell inspector.
+
+3D view: instanced terrain tiles derived from the 7×7 3DEP mesh, flat orange observed tiles and thin predicted-risk columns. It is a viewing aid, not a fire-height or fire-behaviour model. If WebGL is unavailable, the component calls the fallback and the console returns to the 2D map automatically.
+
+Timeline: 14 real frames, play/pause, 0.5×/1×/2×/4× speed, scrubber, previous/next FIRMS observation, frame strip and explicit gap labels. NIST-only frames show a badge saying their spatial symbols are not digitized and no forecast is fabricated.
+
+The legacy 3×3 synthetic exercise remains available inside a collapsed **Synthetic 3×3 exercise (legacy)** section. It is not presented as a historical result.
+
+The URL parameter `?view=scene` or `?view=split` can open the 3D or split view directly for a demo; `?view=map` is the default.
+
+## 11. Remaining work for phase 6
+
 - Add the evacuation-agent and response-resource simulations, labelled simulated.
 - Keep the legacy synthetic exercise available but clearly separated.
