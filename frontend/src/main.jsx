@@ -6,6 +6,7 @@ import DataStatusPanel from "./DataStatusPanel.jsx";
 import ParadiseReplay from "./ParadiseReplay.jsx";
 import FireShieldMark from "./brand/FireShieldMark.jsx";
 import LiveDecisionLoop from "./LiveDecisionLoop.jsx";
+import LandingHero from "./LandingHero.jsx";
 import "./styles.css";
 
 const WildfireScene = lazy(() => import("./WildfireScene.jsx"));
@@ -271,6 +272,7 @@ function App() {
       : `${actions.length} areas need a coordination decision`;
 
   return <main className="appShell">
+    <LandingHero />
     <header className="topbar"><div className="brand"><FireShieldMark /><div><strong>CityShield</strong><small>WILDFIRE DECISION STUDIO</small></div></div><span className="modeBadge">PARADISE 2018 · ADVISORY ONLY</span></header>
 
     <section className="intro"><div><p className="eyebrow">PARADISE, CALIFORNIA · 2018 HISTORICAL REPLAY · IBM LINUXONE</p><h1>Replay the Camp Fire.<br /><em>Test the forecast.</em></h1></div><div className="introAside"><span className="pulseDot" />Camp Fire 2018 replay · 500 m Paradise grid<small>Real FIRMS observations + NIST time windows · research prototype</small></div></section>
