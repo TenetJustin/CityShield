@@ -396,8 +396,40 @@ summary:focus-visible {
   padding: 10px;
   font-size: 10px;
 }
+.consoleShell .livePipeline > div.isActive {
+  background: #2c2416;
+  border-color: var(--copper);
+  box-shadow: 0 0 24px #d7925025;
+}
+.consoleShell .livePipeline > div.isComplete {
+  background: #17271b;
+  border-color: #527258;
+}
 .consoleShell .livePipeline > div::after {
   color: var(--copper);
+}
+.consoleShell .liveOutcome,
+.consoleShell .liveRunTrace > div,
+.consoleShell .liveIdleState {
+  border-radius: 2px;
+}
+.consoleShell .liveOutcomeCopy strong {
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 500;
+}
+.consoleShell .liveOutcomeCopy p {
+  font-size: 11px;
+}
+.consoleShell .liveRunTrace > div {
+  background: #142018;
+  border: 1px solid var(--line);
+  box-shadow: none;
+  padding: 12px;
+}
+.consoleShell .liveRunTrace small,
+.consoleShell .liveRunTrace strong {
+  font-size: 9px;
 }
 .consoleShell .liveActions > div {
   background: #1a261b;

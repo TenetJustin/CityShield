@@ -19,31 +19,74 @@ function statusLabel(status) {
   return "Checking live inputs";
 }
 
+function completionLabel(status) {
+  if (status === "advisory_ready") return "Update complete · live forecast issued";
+  if (status === "abstained_no_observations") return "Update complete · no mapped hotspots; no forecast issued";
+  if (status === "input_incomplete") return "Update complete · required live input unavailable";
+  return "Update complete";
+}
+
+function outcomeHeadline(status) {
+  if (status === "advisory_ready") return "LIVE ADVISORY READY";
+  if (status === "abstained_no_observations") return "NO FORECAST ISSUED";
+  if (status === "input_incomplete") return "LIVE INPUTS INCOMPLETE";
+  return "LIVE CHECK COMPLETE";
+}
+
+function decisionGateLabel(status) {
+  if (status === "advisory_ready") return "advisory ready for review";
+  if (status === "abstained_no_observations") return "abstained safely";
+  if (status === "input_incomplete") return "prediction paused";
+  return status?.replaceAll("_", " ") || "complete";
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
 export default function LiveDecisionLoop({ active = true }) {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasRun, setHasRun] = useState(false);
+  const [completedAt, setCompletedAt] = useState(null);
+  const [pipelineStage, setPipelineStage] = useState(-1);
   const [error, setError] = useState("");
 
   async function load(force = false) {
     setLoading(true);
+    setPipelineStage(0);
+    const progressTimer = window.setInterval(() => {
+      setPipelineStage((current) => Math.min(current + 1, 4));
+    }, 420);
     try {
+      const minimumDisplay = wait(force ? 2200 : 700);
       const response = await fetch(`${API}/api/v1/paradise/nowcast?refresh=${force}`);
       if (!response.ok) throw new Error(`Live decision service returned HTTP ${response.status}`);
-      setData(await response.json());
+      const next = await response.json();
+      await minimumDisplay;
+      setPipelineStage(5);
+      setData(next);
+      setCompletedAt(new Date());
       setError("");
     } catch (cause) {
+      setPipelineStage(-1);
       setError(cause.message);
     } finally {
+      window.clearInterval(progressTimer);
       setLoading(false);
     }
   }
 
+  function runLiveUpdate() {
+    setHasRun(true);
+    load(true);
+  }
+
   useEffect(() => {
-    if (!active) return undefined;
-    load(false);
+    if (!active || !hasRun) return undefined;
     const timer = window.setInterval(() => load(false), 300000);
     return () => window.clearInterval(timer);
-  }, [active]);
+  }, [active, hasRun]);
 
   const sourceOk = (id) => data?.sources?.[id]?.status === "ok";
   return <section className="liveLoop panel" id="live-decision-loop" aria-label="Live AI decision loop">
@@ -53,15 +96,58 @@ export default function LiveDecisionLoop({ active = true }) {
         <h2>From new observations to a human decision queue</h2>
         <p>Current NASA and NOAA data enter the same Paradise grid used by the evaluated replay. CityShield predicts 30/60/120-minute risk, ranks exposed areas and stops when required evidence is missing.</p>
       </div>
-      <button className="primaryButton" onClick={() => load(true)} disabled={loading}>{loading ? "Updating…" : "Run live update"}</button>
+      <button className={`primaryButton liveRunButton ${loading ? "isRunning" : ""}`} onClick={runLiveUpdate} disabled={loading}>
+        {loading && <i aria-hidden="true" />}{loading ? "Running live pipeline…" : data ? "Run live update again" : "Run live update"}
+      </button>
     </div>
 
-    {error && <p className="liveLoopError" role="alert">{error}. The last completed result remains visible.</p>}
+    {error && <p className="liveLoopError" role="alert">{error}.{data ? " The last completed result remains visible." : " No result was produced."}</p>}
     <div className="livePipeline" aria-label="Live inference pipeline">
-      {(data?.telemetry?.pipeline || ["FIRMS + NOAA", "Paradise 500 m grid", "24-member ensemble", "30/60/120 min risk", "human review queue"]).map((step, index) => <div key={step}><b>{index + 1}</b><span>{step}</span>{index < 4 && <i>→</i>}</div>)}
+      {(data?.telemetry?.pipeline || ["FIRMS + NOAA", "Paradise 500 m grid", "24-member ensemble", "30/60/120 min risk", "human review queue"]).map((step, index, steps) => {
+        const state = loading && index === pipelineStage ? "isActive" : pipelineStage > index ? "isComplete" : "";
+        return <div className={state} key={step}><b>{pipelineStage > index ? "✓" : index + 1}</b><span>{step}</span>{index < steps.length - 1 && <i>→</i>}</div>;
+      })}
     </div>
 
-    <div className="liveLoopGrid">
+    {!hasRun && <div className="liveIdleState" aria-live="polite">
+      <span>READY TO CHECK LIVE SOURCES</span>
+      <strong>No live update has been run in this session.</strong>
+      <p>Select <b>Run live update</b> to fetch FIRMS and NOAA, map observations to the Paradise grid, and determine whether a forecast can be issued.</p>
+    </div>}
+
+    {hasRun && loading && !data && <div className="liveIdleState updating" role="status" aria-live="polite">
+      <span>LIVE UPDATE IN PROGRESS</span>
+      <strong>Fetching and validating current observations…</strong>
+      <p>Checking FIRMS and NOAA before mapping observations and running the decision pipeline.</p>
+    </div>}
+
+    {hasRun && !loading && !data && error && <div className="liveIdleState failed">
+      <span>LIVE UPDATE DID NOT COMPLETE</span>
+      <strong>No decision result is available.</strong>
+      <p>Review the source error above, then run the live update again.</p>
+    </div>}
+
+    {data && <>
+      <div className={`liveOutcome ${loading ? "updating" : data.status}`} role="status" aria-live="polite">
+        <div className="liveOutcomeMark" aria-hidden="true">{loading ? "↻" : data.status === "input_incomplete" ? "!" : "✓"}</div>
+        <div className="liveOutcomeCopy">
+          <span>{loading ? "LIVE UPDATE IN PROGRESS" : completionLabel(data.status)}</span>
+          <strong>{loading ? "CHECKING CURRENT SOURCES" : outcomeHeadline(data.status)}</strong>
+          <p>{loading ? "Refreshing FIRMS and NOAA. The previous completed result remains visible below." : data.status_message}</p>
+        </div>
+        <div className="liveOutcomeMeta">
+          <small>{loading ? "Please wait" : `Checked ${localTime(data.issued_at_utc || completedAt?.toISOString())}`}</small>
+          <code>{loading ? "RUNNING" : `RUN ${data.run_id}`}</code>
+          <b>{data.telemetry?.deployment_target || "IBM LinuxONE"} · {data.telemetry?.runtime_architecture || "—"}</b>
+        </div>
+      </div>
+      {!loading && <div className="liveRunTrace" aria-label="Completed live update trace">
+        <div><span>01</span><small>FIRMS checked</small><strong>{data.sources?.["nasa-firms"]?.status || "unknown"} · {data.observation.detections} detections</strong></div>
+        <div><span>02</span><small>NOAA checked</small><strong>{data.sources?.["noaa-nws"]?.status || "unknown"}{data.weather ? ` · ${data.weather.wind_speed_m_s} m/s` : ""}</strong></div>
+        <div><span>03</span><small>Grid mapping</small><strong>{data.observation.mapped_seed_cells.length} seed cells</strong></div>
+        <div><span>04</span><small>Decision gate</small><strong>{decisionGateLabel(data.status)}</strong></div>
+      </div>}
+      <div className={`liveLoopGrid ${loading ? "isRefreshing" : ""}`}>
       <article className="liveStatusCard">
         <div className="liveCardTop"><p className="eyebrow">LIVE INPUTS</p><span className={`liveState ${data?.status || "loading"}`}>{statusLabel(data?.status)}</span></div>
         <strong className="liveBig">{data ? `${data.observation.detections} detections` : "Checking…"}</strong>
@@ -114,6 +200,7 @@ export default function LiveDecisionLoop({ active = true }) {
           <div><dt>Audit</dt><dd><code>{data?.audit_hash?.slice(0, 12) || "—"}</code></dd></div>
         </dl>
       </article>
-    </div>
+      </div>
+    </>}
   </section>;
 }
