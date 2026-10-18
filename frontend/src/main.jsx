@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, lazy, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import WildfireMap2D from "./WildfireMap2D.jsx";
 import ParadiseData from "./ParadiseData.jsx";
@@ -8,6 +8,8 @@ import FireShieldMark from "./brand/FireShieldMark.jsx";
 import LiveDecisionLoop from "./LiveDecisionLoop.jsx";
 import LandingHero from "./LandingHero.jsx";
 import "./styles.css";
+import { ConsoleHeader, ModuleRail, MODULES, ProductDocs, GuideNavigation, ModuleGuideLinks, guideTarget, readGuideTarget, guideUrl } from "./Layout.jsx";
+import "./layout-preview.css";
 
 const WildfireScene = lazy(() => import("./WildfireScene.jsx"));
 
@@ -36,6 +38,46 @@ const riskLevel = (value) => value >= 0.6 ? "High" : value >= 0.3 ? "Elevated" :
 const formatArea = (value) => value < 1 ? `${Math.round(value * 100)} ha` : `${value.toFixed(2)} km²`;
 
 function App() {
+  const [docsOpen, setDocsOpen] = useState(window.location.pathname.startsWith("/guide"));
+  const [docTarget, setDocTarget] = useState(() => readGuideTarget());
+  const [moduleId, setModuleId] = useState(() => {
+    if (window.location.pathname.startsWith("/guide")) {
+      const id = readGuideTarget().chapter;
+      return id === "evaluation" || id === "response" ? "replay" : MODULES.some(m => m.id === id) ? id : "live";
+    }
+    return MODULES.some(m => m.id === window.location.hash.slice(1)) ? window.location.hash.slice(1) : "live";
+  });
+  useLayoutEffect(() => { if (!docsOpen) window.scrollTo({ top: 0, behavior: "instant" }); }, [docsOpen, moduleId]);
+  function updateLocation(url) {
+    if (window.location.pathname + window.location.hash !== url) history.pushState(null, "", url);
+  }
+  function navigateWorkspace(id = moduleId) {
+    setModuleId(id); setDocsOpen(false);
+    updateLocation(`/workspace#${id}`);
+  }
+  function navigateDocs(chapter = "overview", section = "") {
+    const target = guideTarget(chapter, section);
+    setDocTarget(target); setDocsOpen(true);
+    updateLocation(guideUrl(target));
+  }
+  useEffect(() => {
+    function restoreLocation() {
+      const guide = window.location.pathname.startsWith("/guide");
+      setDocsOpen(guide);
+      if (guide) setDocTarget(readGuideTarget());
+      else {
+        const id = window.location.hash.slice(1);
+        setModuleId(MODULES.some(m => m.id === id) ? id : "live");
+      }
+    }
+    window.addEventListener("popstate", restoreLocation);
+    window.addEventListener("hashchange", restoreLocation);
+    return () => {
+      window.removeEventListener("popstate", restoreLocation);
+      window.removeEventListener("hashchange", restoreLocation);
+    };
+  }, []);
+  useEffect(() => { document.title = docsOpen ? "CityShield · Product guide" : "CityShield · Workspace"; }, [docsOpen]);
   const [result, setResult] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [worldState, setWorldState] = useState(null);
@@ -64,6 +106,7 @@ function App() {
   const [error, setError] = useState("");
   const [rsiCandidate, setRsiCandidate] = useState(null);
   const eventSource = useRef(null);
+  const moduleActive = (id) => !docsOpen && moduleId === id;
 
   async function refreshSystem() {
     const [ready, cityData, stateData, sourceData, metricData, auditData, deliveryData, incidentData] = await Promise.all([
@@ -208,11 +251,12 @@ function App() {
   }
 
   useEffect(() => {
+    if (!moduleActive("legacy") && !moduleActive("evidence")) return undefined;
     refreshSystem().catch((value) => setError(value.message));
     return () => eventSource.current?.close();
-  }, []);
+  }, [docsOpen, moduleId]);
   useEffect(() => {
-    if (!playing) return undefined;
+    if (!moduleActive("legacy") || !playing) return undefined;
     const timer = window.setInterval(() => {
       const sequence = viewMode === "replay" ? REPLAY_TIMES : HORIZONS;
       const current = viewMode === "replay" ? replayMinute : horizon;
@@ -222,7 +266,14 @@ function App() {
       else setHorizon(sequence[index + 1]);
     }, 1500);
     return () => window.clearInterval(timer);
-  }, [playing, viewMode, replayMinute, horizon]);
+  }, [docsOpen, moduleId, playing, viewMode, replayMinute, horizon]);
+  useEffect(() => {
+    if (moduleActive("legacy")) return;
+    setPlaying(false);
+    setLoading(false);
+    eventSource.current?.close();
+    eventSource.current = null;
+  }, [docsOpen, moduleId]);
 
   const replayFrame = useMemo(() => {
     const frames = incident?.frames || [];
@@ -271,21 +322,25 @@ function App() {
       ? scenario === "baseline" ? "Choose a change to compare with the outlook" : `${SCENARIOS.find((item) => item.id === scenario)?.title} compared with baseline`
       : `${actions.length} areas need a coordination decision`;
 
-  return <main className="appShell">
-    <header className="topbar"><div className="brand"><FireShieldMark /><div><strong>CityShield</strong><small>WILDFIRE DECISION STUDIO</small></div></div><div className="workspaceNav"><a href="/">Home</a><span className="modeBadge">PARADISE 2018 · ADVISORY ONLY</span></div></header>
-
-    <section className="intro"><div><p className="eyebrow">PARADISE, CALIFORNIA · 2018 HISTORICAL REPLAY · IBM LINUXONE</p><h1>Replay the Camp Fire.<br /><em>Test the forecast.</em></h1></div><div className="introAside"><span className="pulseDot" />Camp Fire 2018 replay · 500 m Paradise grid<small>Real FIRMS observations + NIST time windows · research prototype</small></div></section>
+  return <GuideNavigation.Provider value={navigateDocs}><main className="appShell consoleShell">
+    <ConsoleHeader docsOpen={docsOpen} onWorkspace={() => navigateWorkspace()} onDocs={() => navigateDocs()} />
+    <div hidden={!docsOpen}><ProductDocs target={docTarget} active={docsOpen} onNavigate={navigateDocs} onReturn={() => navigateWorkspace()} /></div>
+    <div className="consoleLayout" hidden={docsOpen}>
+      <ModuleRail active={moduleId} onSelect={navigateWorkspace} />
+      <div className="consoleContent">
+      <div className="consoleBreadcrumb"><span>WORKSPACE / {MODULES.find(m => m.id === moduleId)?.en}</span><button onClick={() => navigateDocs(moduleId)}>User guide ↗</button></div>
+    <ModuleGuideLinks moduleId={moduleId} />
     {error && <div className="error" role="alert">{error}</div>}
 
-    <LiveDecisionLoop />
+    <div className="modulePane" hidden={moduleId !== "live"}><LiveDecisionLoop active={moduleActive("live")} /></div>
 
-    <ParadiseData />
+    <div className="modulePane" hidden={moduleId !== "map"}><ParadiseData active={moduleActive("map")} /></div>
 
-    <DataStatusPanel />
+    <div className="modulePane" hidden={moduleId !== "quality"}><DataStatusPanel active={moduleActive("quality")} /></div>
 
-    <ParadiseReplay />
+    <div className="modulePane" hidden={moduleId !== "replay"}><ParadiseReplay active={moduleActive("replay")} /></div>
 
-    <details className="legacyExercise panel">
+    <div className="modulePane" hidden={moduleId !== "legacy"}><details className="legacyExercise panel" open>
       <summary><span><b>Synthetic 3×3 exercise (legacy)</b><small>Offline demo, not a historical result. Open only for the original workflow.</small></span><span>Expand +</span></summary>
     <div className="legacyToolbar"><div className="modeSwitch" aria-label="Legacy exercise mode"><button className={viewMode === "live" ? "active" : ""} onClick={() => { setViewMode("live"); setPlaying(false); }}>Legacy live</button><button className={viewMode === "replay" ? "active" : ""} onClick={() => { setViewMode("replay"); setReplayMinute(0); setPlaying(false); }}>Legacy replay</button></div><button className="primaryButton" onClick={viewMode === "replay" ? replay : startStream} disabled={loading}>{loading ? "Running…" : viewMode === "replay" ? "Run legacy replay" : "Run synthetic stream"}</button></div>
     <nav className="stepNav" aria-label="Decision workflow">{[
@@ -298,7 +353,7 @@ function App() {
       ["forecast", "Forecast"], ["observed", "Observed edge"], ["hotspots", "Hotspots"], ["resources", "Resources"],
     ].map(([id, label]) => <button key={id} className={layers[id] ? "active" : ""} onClick={() => setLayers((current) => ({ ...current, [id]: !current[id] }))}><i />{label}</button>)}</div>{viewMode === "replay" && <div className="qualityRibbon"><strong>Offline-safe replay</strong><span>{incident?.quality?.label} · actual and predicted states remain visually separate.</span></div>}<div className={spatialView === "split" ? "spatialViews split" : "spatialViews"}>
       {spatialView !== "scene" && <WildfireMap2D cells={cells} selectedCell={selected?.id} onSelect={setSelectedCell} showObserved={viewMode === "replay" && layers.observed} showHotspots={viewMode === "replay" && layers.hotspots} resources={layers.resources && viewMode === "replay" ? activeResources : []} />}
-      {spatialView !== "map" && <Suspense fallback={<div className="sceneLoading">Loading 3D view…</div>}><WildfireScene cells={cells} selectedCell={selected?.id} onSelect={setSelectedCell} resetSignal={resetSignal} showObserved={viewMode === "replay" && layers.observed} showHotspots={viewMode === "replay" && layers.hotspots} resources={layers.resources && viewMode === "replay" ? activeResources : []} /></Suspense>}
+      {moduleActive("legacy") && spatialView !== "map" && <Suspense fallback={<div className="sceneLoading">Loading 3D view…</div>}><WildfireScene cells={cells} selectedCell={selected?.id} onSelect={setSelectedCell} resetSignal={resetSignal} showObserved={viewMode === "replay" && layers.observed} showHotspots={viewMode === "replay" && layers.hotspots} resources={layers.resources && viewMode === "replay" ? activeResources : []} /></Suspense>}
     </div><div className="timeline"><div className="timelineTop"><strong>{viewMode === "replay" ? "Incident evidence timeline" : "Forecast timeline"}</strong><span>{forecast ? `+${viewMode === "replay" ? replayMinute : horizon} min` : "Receiving live observations"}</span></div><div className="timelineControls"><button className="playButton" onClick={() => { const atEnd = viewMode === "replay" ? replayMinute === 120 : horizon === 120; if (atEnd) { if (viewMode === "replay") setReplayMinute(0); else setHorizon(30); } setPlaying(!playing); }} disabled={!forecast} aria-label={playing ? "Pause timeline" : "Play timeline"}>{playing ? "Ⅱ" : "▶"}</button><div className="timeChoices">{(viewMode === "replay" ? REPLAY_TIMES : HORIZONS).map((value) => <button key={value} className={(viewMode === "replay" ? replayMinute : horizon) === value ? "active" : ""} onClick={() => { setPlaying(false); if (viewMode === "replay") setReplayMinute(value); else setHorizon(value); }} disabled={!forecast}>+{value} min</button>)}</div></div>{viewMode === "replay" && <div className="eventTrack">{(incident?.events || []).map((event) => <span key={`${event.minute}-${event.type}`} className={event.minute <= replayMinute ? "reached" : ""}><i />{event.label}</span>)}</div>}</div><div className="legend"><span><i className="low" /> Low &lt;10%</span><span><i className="watch" /> Watch 10–29%</span><span><i className="elevated" /> Elevated 30–59%</span><span><i className="high" /> High ≥60%</span>{viewMode === "replay" && <><span><i className="observed" /> Observed</span><span><i className="hotspot" /> Hotspot</span></>}</div><p className="disclaimer">Illustrative terrain and synthetic {city?.model_grid_m || 500} m cells. P90 is an uncalibrated model proxy; colored cells are not a fire perimeter or official warning.</p></article>
 
     <aside className="insightPanel panel">{activeStep === "situation" && <><p className="eyebrow">01 / UNDERSTAND RISK</p><h2>{viewMode === "replay" ? "What did the model see?" : "What needs attention?"}</h2><div className="metricMain"><strong>{formatArea(footprint)}</strong><span>area at Watch risk or higher</span></div><div className="metricPair"><div><strong>{viewMode === "replay" ? `${observedSet.size} cells` : growthRate == null ? "—" : `${formatArea(Math.max(0, growthRate))}/h`}</strong><small>{viewMode === "replay" ? "observed exercise perimeter" : "average area growth since +30 min"}</small></div><div><strong>{viewMode === "replay" ? overlapPct == null ? "—" : `${overlapPct}%` : exposedPopulation.toLocaleString()}</strong><small>{viewMode === "replay" ? "observed cells captured by elevated forecast" : "people in elevated/high cells"}</small></div></div>{viewMode === "replay" && <div className="replaySummary"><span><b>{replayFrame?.hotspot_cells?.length || 0}</b> hotspots</span><span><b>{activeResources.length}</b> active resources</span><span><b>{replayFrame?.weather?.wind_speed || "—"}</b> m/s wind</span></div>}<div className="severityBar" aria-label={`${counts.high} high, ${counts.elevated} elevated, ${counts.watch} watch cells`}><i style={{ flex: counts.high || 0.05 }} /><i style={{ flex: counts.elevated || 0.05 }} /><i style={{ flex: counts.watch || 0.05 }} /></div><p className="countLine">{counts.high} high · {counts.elevated} elevated · {counts.watch} watch</p><div className="sectionDivider" /><p className="eyebrow">SELECTED AREA</p>{selected ? <div className="selectedArea"><div><strong>{selected.id}</strong><span className={`riskBadge ${riskLevel(selected.risk).toLowerCase()}`}>{riskLevel(selected.risk)}</span></div><p>{forecast ? "P90 risk" : "Observed state proxy"} {Math.round(selected.risk * 100)}% · {selected.population?.toLocaleString() || 0} residents · {selected.critical_facilities || 0} critical facilities{selected.observed ? " · observed inside perimeter" : ""}</p></div> : <p>Run the demonstration to inspect an area.</p>}<div className="areaList">{sortedCells.slice(0, 4).map((cell) => <button key={cell.id} className={selected?.id === cell.id ? "active" : ""} onClick={() => setSelectedCell(cell.id)}><span>{cell.id}{cell.observed ? " · observed" : ""}</span><b>{Math.round(cell.risk * 100)}%</b></button>)}</div><button className="nextButton" onClick={() => setActiveStep("scenario")}>Next: test a scenario <span>→</span></button></>}
@@ -306,23 +361,23 @@ function App() {
     {activeStep === "scenario" && <><p className="eyebrow">02 / TEST A SCENARIO</p><h2>Change one assumption</h2><p className="panelLead">Every option uses the same frozen observation snapshot. Select one to see how risk changes.</p><div className="scenarioList">{SCENARIOS.map((item) => <button key={item.id} className={scenario === item.id ? "scenarioCard active" : "scenarioCard"} onClick={() => simulate(item.id)} disabled={loading || !result}><span><strong>{item.title}</strong><small>{item.detail}</small></span><b>{scenario === item.id ? "✓" : "→"}</b></button>)}</div><div className="sectionDivider" /><p className="eyebrow">PAIRED DIFFERENCE · +{displayHorizon} MIN</p><div className="metricMain"><strong>{selectedDelta >= 0 ? "+" : ""}{Math.round(selectedDelta * 100)} pts</strong><span>P90 change in selected cell {selected?.id || "—"}</span></div><p className="comparisonNote">{simulation ? `Scenario run ${simulation.simulation_run_id} · both runs share evidence ${simulation.baseline.evidence_snapshot_id}.` : "Choose a scenario to compare with baseline."}</p><button className="nextButton" onClick={() => setActiveStep("action")}>Next: review action <span>→</span></button></>}
 
     {activeStep === "action" && <><p className="eyebrow">03 / REVIEW ACTION</p><h2>Human decision queue</h2><p className="panelLead">Recommendations use the frozen baseline forecast. Scenario results inform discussion; they do not silently change the queue.</p><div className="decisionStatus"><span className="pulseDot" />{decision?.status?.replaceAll("_", " ") || "Awaiting forecast"}</div><div className="actionList">{actions.slice(0, 5).map((action) => <div className="actionRow" key={action.cell_id}><b>P{action.priority}</b><div><strong>{action.cell_id} · {action.action.replaceAll("_", " ")}</strong><small>{action.reason}</small></div></div>)}</div>{decision?.status === "pending_human_review" && <div className="reviewButtons"><button className="secondaryButton" onClick={() => review(false)}>Reject</button><button className="primaryButton" onClick={() => review(true)}>Approve for coordination</button></div>}<p className="safetyNote">Approval records a coordination decision. It does not issue an alert, order an evacuation or dispatch responders.</p></>}</aside></section>
-    </details>
+    </details></div>
 
-    <details className="evidence panel"><summary><span><b>Evidence, data readiness & system details</b><small>Sources, fallbacks, audit trail, model limits and improvement</small></span><span>Expand +</span></summary><div className="deliveryBanner"><div><span className="statusDot pass" /><strong>Competition demo ready</strong><small>Offline replay, forecast, decision and audit paths do not require an external API.</small></div><div><span className={`statusDot ${delivery?.live_city_ready ? "pass" : "blocked"}`} /><strong>{delivery?.live_city_ready ? "Live city feeds ready" : "Live city feeds gated"}</strong><small>{delivery?.city_selected ? "Source checks still required" : "Select a city before claiming live operation"}.</small></div></div><div className="evidenceGrid"><div><p className="eyebrow">DATA SOURCES</p>{sources.map((source) => <div className="evidenceRow" key={source.source_id}><span>{source.source_id}</span><small>{source.ready ? "Live ready" : source.adapter === "implemented" ? "Adapter ready" : "City work"}</small></div>)}</div><div><p className="eyebrow">DELIVERY GATES</p>{(delivery?.gates || []).map((gate) => <div className="gateRow" key={gate.id}><span className={`statusDot ${gate.status}`} /><div><strong>{gate.label}</strong><small>{gate.reason}</small></div></div>)}</div><div><p className="eyebrow">AUDIT TRAIL</p><p className="evidenceSummary">{readiness?.audit?.valid ? "Chain verified" : "Checking"} · {readiness?.audit?.records || 0} records</p>{audits.slice(0, 5).map((record) => <div className="evidenceRow" key={record.hash}><span>{record.event_type.replaceAll("_", " ")}</span><code>{record.hash.slice(0, 8)}</code></div>)}</div><div><p className="eyebrow">CONTROLLED IMPROVEMENT</p><p className="evidenceSummary">Model {forecast?.model_version || "—"}</p><p>A completed event can produce a shadow candidate. Active predictions never change automatically.</p><button className="secondaryButton" onClick={evaluateRsi} disabled={!forecast}>Run demo evaluation</button>{rsiCandidate && <p className="candidateNote">{rsiCandidate.status} · Brier {rsiCandidate.evaluation.brier_score}</p>}</div></div><div className="evidenceFooter"><span>Evidence {forecast?.evidence_snapshot_id || "—"}</span><span>Forecast {forecast?.forecast_run_id || "—"}</span><span>{metrics?.observations_ingested || 0} observations processed</span><span>{delivery?.policy}</span></div></details>
+    <div className="modulePane" hidden={moduleId !== "evidence"}><details className="evidence panel" open><summary><span><b>Evidence, data readiness & system details</b><small>Sources, fallbacks, audit trail, model limits and improvement</small></span><span>Expand +</span></summary><div className="deliveryBanner"><div><span className="statusDot pass" /><strong>Competition demo ready</strong><small>Offline replay, forecast, decision and audit paths do not require an external API.</small></div><div><span className={`statusDot ${delivery?.live_city_ready ? "pass" : "blocked"}`} /><strong>{delivery?.live_city_ready ? "Live city feeds ready" : "Live city feeds gated"}</strong><small>{delivery?.city_selected ? "Source checks still required" : "Select a city before claiming live operation"}.</small></div></div><div className="evidenceGrid"><div><p className="eyebrow">DATA SOURCES</p>{sources.map((source) => <div className="evidenceRow" key={source.source_id}><span>{source.source_id}</span><small>{source.ready ? "Live ready" : source.adapter === "implemented" ? "Adapter ready" : "City work"}</small></div>)}</div><div><p className="eyebrow">DELIVERY GATES</p>{(delivery?.gates || []).map((gate) => <div className="gateRow" key={gate.id}><span className={`statusDot ${gate.status}`} /><div><strong>{gate.label}</strong><small>{gate.reason}</small></div></div>)}</div><div><p className="eyebrow">AUDIT TRAIL</p><p className="evidenceSummary">{readiness?.audit?.valid ? "Chain verified" : "Checking"} · {readiness?.audit?.records || 0} records</p>{audits.slice(0, 5).map((record) => <div className="evidenceRow" key={record.hash}><span>{record.event_type.replaceAll("_", " ")}</span><code>{record.hash.slice(0, 8)}</code></div>)}</div><div><p className="eyebrow">CONTROLLED IMPROVEMENT</p><p className="evidenceSummary">Model {forecast?.model_version || "—"}</p><p>A completed event can produce a shadow candidate. Active predictions never change automatically.</p><button className="secondaryButton" onClick={evaluateRsi} disabled={!forecast}>Run demo evaluation</button>{rsiCandidate && <p className="candidateNote">{rsiCandidate.status} · Brier {rsiCandidate.evaluation.brier_score}</p>}</div></div><div className="evidenceFooter"><span>Evidence {forecast?.evidence_snapshot_id || "—"}</span><span>Forecast {forecast?.forecast_run_id || "—"}</span><span>{metrics?.observations_ingested || 0} observations processed</span><span>{delivery?.policy}</span></div></details></div>
     <footer>CityShield research prototype · Demonstration data only · Built for IBM Z Datathon 2026</footer>
-  </main>;
+      </div>
+    </div>
+  </main></GuideNavigation.Provider>;
 }
 
 function Root() {
-  const workspace = window.location.pathname === "/workspace" || window.location.pathname === "/workspace/";
+  const workspace = window.location.pathname.startsWith("/workspace") || window.location.pathname.startsWith("/guide");
   useEffect(() => {
-    document.title = workspace
-      ? "CityShield · Decision Workspace"
-      : "CityShield · Real-Time Wildfire Decisions";
+    if (!workspace) document.title = "CityShield · Real-Time Wildfire Decisions";
   }, [workspace]);
   return workspace
     ? <App />
-    : <main className="appShell homeShell"><LandingHero /></main>;
+    : <main className="appShell homeShell"><div className="homeTop"><a href="/workspace">Workspace ↗</a><a href="/guide">Product guide ↗</a><span>RESEARCH PROTOTYPE</span></div><LandingHero /></main>;
 }
 
 createRoot(document.getElementById("root")).render(<Root />);

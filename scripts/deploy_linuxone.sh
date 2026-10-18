@@ -64,6 +64,8 @@ podman run -d --name cityshield-candidate \
   "$image"
 wait_for_health 18001
 curl -fsS http://127.0.0.1:18001/ >/dev/null
+curl -fsS http://127.0.0.1:18001/workspace >/dev/null
+curl -fsS http://127.0.0.1:18001/guide >/dev/null
 curl -fsS http://127.0.0.1:18001/api/v1/paradise/geography >/dev/null
 python3 scripts/smoke_test.py http://127.0.0.1:18001
 cleanup

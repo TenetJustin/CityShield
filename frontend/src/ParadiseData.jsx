@@ -20,7 +20,7 @@ function timestamp(value) {
   return value ? new Date(value).toLocaleString("en-US", { timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short" }) + " PT" : "—";
 }
 
-export default function ParadiseData() {
+export default function ParadiseData({ active = true }) {
   const [geo, setGeo] = useState(null);
   const [historical, setHistorical] = useState(null);
   const [showHistorical, setShowHistorical] = useState(false);
@@ -47,12 +47,13 @@ export default function ParadiseData() {
   }
 
   useEffect(() => {
+    if (!active) return undefined;
     refresh();
     fetch(`${API}/api/v1/paradise/history/camp-fire-final`).then((response) => response.ok ? response.json() : null).then(setHistorical).catch(() => setHistorical(null));
     fetch(`${API}/api/v1/paradise/terrain`).then((response) => response.ok ? response.json() : null).then(setTerrain).catch(() => setTerrain(null));
     const timer = window.setInterval(refresh, 300000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [active]);
 
   const projection = useMemo(() => {
     if (!geo?.bbox) return null;

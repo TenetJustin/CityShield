@@ -18,6 +18,7 @@ It implements a transparent **Detect → Decide → Respond** loop:
 ## Current status
 
 - The new **decision-first landing page** combines the CityShield fire-shield mark with the real Paradise boundary and road network. Its default state is driven by the live nowcast; an optional, explicitly labelled 2018 preview animates historical FIRMS progression without presenting it as a current fire.
+- The **modular workspace** separates live decisions, current observations, data quality, replay and simulation, the legacy exercise and system evidence. A linked `/guide` explains every module and uses stable section addresses; inactive modules pause polling, playback and 3D rendering.
 - The **live decision loop** now connects NASA FIRMS and NOAA hourly forecasts to the shared grid, a versioned 24-member ensemble at 30/60/120 minutes, mapped population exposure, ranked advisory actions and mandatory human review. It reports source freshness, inference latency, model/grid/Git identity and the LinuxONE runtime architecture. If required inputs are missing or no hotspot maps to the grid, it abstains visibly instead of borrowing the historical replay.
 - A frozen **Paradise 500 m grid** (841 cells, 3 km town buffer) is the single spatial contract for FIRMS hotspots, ACS population exposure, Census roads, terrain and the backend model. See [Paradise replay data](docs/PARADISE_REPLAY.md).
 - The **NASA FIRMS Camp Fire package** contains 2,017 VIIRS detections in 9 snapshots from 2018-11-08 11:50 PT to 2018-11-09 14:01 PT. It is an observation-point layer, not a perimeter.

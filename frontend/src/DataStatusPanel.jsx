@@ -33,14 +33,15 @@ function timestamp(value) {
   }) + " PT";
 }
 
-export default function DataStatusPanel() {
+export default function DataStatusPanel({ active = true }) {
   const [report, setReport] = useState(null);
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    let active = true;
+    if (!active) return undefined;
+    let current = true;
     Promise.all([
       fetch(`${API}/api/v1/paradise/data-quality`).then((response) => {
         if (!response.ok) throw new Error("Data quality report is unavailable");
@@ -52,16 +53,16 @@ export default function DataStatusPanel() {
       }),
     ])
       .then(([quality, grid]) => {
-        if (!active) return;
+        if (!current) return;
         setReport(quality);
         setSummary(grid);
         setError("");
       })
       .catch((cause) => {
-        if (active) setError(cause.message);
+        if (current) setError(cause.message);
       });
-    return () => { active = false; };
-  }, []);
+    return () => { current = false; };
+  }, [active]);
 
   const orderedChecks = useMemo(() => {
     if (!report) return [];

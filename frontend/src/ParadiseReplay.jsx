@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ParadiseGridMap2D from "./ParadiseGridMap2D.jsx";
+import { GuideLink } from "./Layout.jsx";
 import EvaluationPanel from "./EvaluationPanel.jsx";
 import EvacuationPanel from "./EvacuationPanel.jsx";
 import { riskColor } from "./riskVisual.js";
@@ -52,7 +53,8 @@ function riskLabel(probability) {
   return "Low";
 }
 
-export default function ParadiseReplay() {
+export default function ParadiseReplay({ active = true }) {
+  const [replayPane, setReplayPane] = useState("terrain");
   const [grid, setGrid] = useState(null);
   const [geography, setGeography] = useState(null);
   const [replay, setReplay] = useState(null);
@@ -77,9 +79,11 @@ export default function ParadiseReplay() {
   const [forecastLoading, setForecastLoading] = useState(false);
   const [forecastError, setForecastError] = useState("");
   const forecastAbort = useRef(null);
+  const loaded = useRef(false);
 
   useEffect(() => {
-    let active = true;
+    if (!active || loaded.current) return undefined;
+    let current = true;
     const controller = new AbortController();
     setLoading(true);
     Promise.all([
@@ -90,22 +94,23 @@ export default function ParadiseReplay() {
       getJson("/api/v1/paradise/replay/config", controller.signal),
     ])
       .then(([gridData, geographyData, replayData, evaluationData, configData]) => {
-        if (!active) return;
+        if (!current) return;
         setGrid(gridData);
         setGeography(geographyData);
         setReplay(replayData);
         setEvaluation(evaluationData);
         setConfig(configData);
+        loaded.current = true;
         const firstObservation = replayData.frames.findIndex((frame) => frame.observation_count > 0);
         setFrameIndex(firstObservation >= 0 ? firstObservation : 0);
         setError("");
       })
       .catch((cause) => {
-        if (active && cause.name !== "AbortError") setError(cause.message);
+        if (current && cause.name !== "AbortError") setError(cause.message);
       })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; controller.abort(); };
-  }, []);
+      .finally(() => { if (current) setLoading(false); });
+    return () => { current = false; controller.abort(); };
+  }, [active]);
 
   const frames = replay?.frames || [];
   const frame = frames[frameIndex] || null;
@@ -126,7 +131,7 @@ export default function ParadiseReplay() {
   const scenario = SCENARIOS.find((item) => item.id === scenarioId) || SCENARIOS[0];
 
   useEffect(() => {
-    if (!frame) return;
+    if (!active || !frame) return undefined;
     if (!frame.observation_count) {
       forecastAbort.current?.abort();
       setForecast(null);
@@ -154,17 +159,23 @@ export default function ParadiseReplay() {
       })
       .finally(() => { if (!controller.signal.aborted) setForecastLoading(false); });
     return () => controller.abort();
-  }, [frame, leadMinutes, scenario]);
+  }, [active, frame, leadMinutes, scenario]);
 
   useEffect(() => {
-    if (!playing || !frames.length) return undefined;
+    if (!active || !playing || !frames.length) return undefined;
     if (frameIndex >= frames.length - 1) {
       setPlaying(false);
       return undefined;
     }
     const timer = window.setTimeout(() => setFrameIndex((value) => Math.min(value + 1, frames.length - 1)), 1900 / speed);
     return () => window.clearTimeout(timer);
-  }, [playing, speed, frameIndex, frames.length]);
+  }, [active, playing, speed, frameIndex, frames.length]);
+
+  useEffect(() => {
+    if (active) return;
+    setPlaying(false);
+    forecastAbort.current?.abort();
+  }, [active]);
 
   const handleSceneUnavailable = useCallback(() => {
     setSceneFailed(true);
@@ -239,6 +250,13 @@ export default function ParadiseReplay() {
       </div>
     </div>
 
+    <nav className="subNav" aria-label="Replay workspace">{[["terrain", "01", "Historical replay"], ["evaluation", "02", "Model evaluation"], ["response", "03", "Response simulation"]].map(([id, n, label]) => <button key={id} className={replayPane === id ? "active" : ""} aria-pressed={replayPane === id} onClick={() => setReplayPane(id)}><small>{n}</small>{label}</button>)}</nav>
+    <div className="contextHelp" role="group" aria-label="Replay explanations">
+      {replayPane === "terrain" && <><GuideLink chapter="replay" section="maps-and-cells">Map & cell guide</GuideLink><GuideLink chapter="replay" section="forecast-lead-and-scenarios">Forecast assumptions</GuideLink></>}
+      {replayPane === "evaluation" && <><GuideLink chapter="evaluation" section="key-metrics">Metric definitions</GuideLink><GuideLink chapter="evaluation" section="sample-size-and-interpretation">Evaluation limits</GuideLink></>}
+      {replayPane === "response" && <GuideLink chapter="response" section="formulas-and-parameters">Simulation assumptions</GuideLink>}
+    </div>
+    <div className="replayTerrainPane" hidden={replayPane !== "terrain"}>
     <div className="prTimelineBar">
       <div className="prTimelineTop">
         <div>
@@ -290,7 +308,7 @@ export default function ParadiseReplay() {
         {sceneFailed && <p className="prSceneFailedNote">3D graphics are unavailable on this device; the 2D map remains active.</p>}
         <div className={spatialView === "split" ? "prSpatial split" : "prSpatial"}>
           {spatialView !== "scene" && <ParadiseGridMap2D grid={grid} geography={geography} frame={frame} forecast={forecast} selectedCell={selectedCell} onSelect={setSelectedCell} layers={layers} />}
-          {spatialView !== "map" && <Suspense fallback={<div className="prSceneLoading">Loading the 3D terrain view…</div>}><ParadiseGridScene3D grid={grid} geography={geography} frame={frame} forecast={forecast} selectedCell={selectedCell} onSelect={setSelectedCell} layers={layers} onUnavailable={handleSceneUnavailable} /></Suspense>}
+          {active && replayPane === "terrain" && spatialView !== "map" && <Suspense fallback={<div className="prSceneLoading">Loading the 3D terrain view…</div>}><ParadiseGridScene3D grid={grid} geography={geography} frame={frame} forecast={forecast} selectedCell={selectedCell} onSelect={setSelectedCell} layers={layers} onUnavailable={handleSceneUnavailable} /></Suspense>}
         </div>
         <div className="prControlRow">
           <div className="prLeadControl"><small>FORECAST LEAD</small><button className={leadMode === "next" ? "active" : ""} onClick={() => setLeadMode("next")} disabled={!nextObservation}>{nextObservation ? `Next observation (${minutesBetween(frame.at_utc, nextObservation.at_utc)} min)` : "No later snapshot"}</button>{[30, 60, 120].map((value) => <button key={value} className={leadMode === "manual" && manualLead === value ? "active" : ""} onClick={() => { setLeadMode("manual"); setManualLead(value); }}>+{value}</button>)}</div>
@@ -393,8 +411,8 @@ export default function ParadiseReplay() {
       </aside>
     </div>
 
-    <EvaluationPanel evaluation={evaluation} />
-
-    <EvacuationPanel />
+    </div>
+    <div hidden={replayPane !== "evaluation"}><EvaluationPanel evaluation={evaluation} /></div>
+    <div hidden={replayPane !== "response"}><EvacuationPanel active={active && replayPane === "response"} /></div>
   </section>;
 }

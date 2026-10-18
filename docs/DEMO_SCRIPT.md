@@ -9,6 +9,11 @@ live Paradise map, then use **Open workspace** to enter the evidence and decisio
 workflow. **Preview 2018 spread** is explicitly historical and must not be
 described as a current Paradise incident.
 
+Inside the workspace, use the six-item module rail rather than scrolling through
+one long page. Open **Product guide** only when a judge asks how a metric, source
+or simulation should be interpreted; return to the same workspace module when
+the explanation is complete.
+
 ## 1:00–1:40 — Establish the evidence boundary
 
 Use **Paradise public data** and **Data status**. Point out the 2,017 FIRMS detections, 2017 ACS exposure, 2025 roads, coarse terrain and four blocked layers. Explain that FIRMS points are active-fire detections rather than a perimeter, and that NIST contributes verified time windows because its spatial symbols remain undigitized.

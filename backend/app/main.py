@@ -594,6 +594,8 @@ async def stream_demo(delay_ms: int = Query(default=250, ge=0, le=5000)):
 
 # The LinuxONE image includes the built console; API routes above take priority.
 if frontend_dist.is_dir():
+    @app.get("/guide", include_in_schema=False)
+    @app.get("/guide/", include_in_schema=False)
     @app.get("/workspace", include_in_schema=False)
     @app.get("/workspace/", include_in_schema=False)
     def workspace_console():

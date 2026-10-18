@@ -19,7 +19,7 @@ function statusLabel(status) {
   return "Checking live inputs";
 }
 
-export default function LiveDecisionLoop() {
+export default function LiveDecisionLoop({ active = true }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,10 +39,11 @@ export default function LiveDecisionLoop() {
   }
 
   useEffect(() => {
+    if (!active) return undefined;
     load(false);
     const timer = window.setInterval(() => load(false), 300000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [active]);
 
   const sourceOk = (id) => data?.sources?.[id]?.status === "ok";
   return <section className="liveLoop panel" id="live-decision-loop" aria-label="Live AI decision loop">

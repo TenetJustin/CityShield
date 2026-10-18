@@ -1,3 +1,4 @@
+import { GuideLink } from "./Layout.jsx";
 import { useEffect, useMemo, useState } from "react";
 
 const API = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://localhost:8000" : "");
@@ -123,7 +124,8 @@ function ResponseFlowMap({ detail, resources }) {
   </div>;
 }
 
-export default function EvacuationPanel() {
+export default function EvacuationPanel({ active = true }) {
+  const [responsePane, setResponsePane] = useState("timing");
   const [config, setConfig] = useState(null);
   const [comparison, setComparison] = useState(null);
   const [selectedId, setSelectedId] = useState("late");
@@ -136,42 +138,44 @@ export default function EvacuationPanel() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    let active = true;
+    if (!active) return undefined;
+    let current = true;
     get("/api/v1/paradise/response/config")
-      .then((data) => { if (active) setConfig(data); })
-      .catch((cause) => { if (active) setError(cause.message); });
-    return () => { active = false; };
-  }, []);
+      .then((data) => { if (current) setConfig(data); })
+      .catch((cause) => { if (current) setError(cause.message); });
+    return () => { current = false; };
+  }, [active]);
 
   useEffect(() => {
-    let active = true;
+    if (!active) return undefined;
+    let current = true;
     post("/api/v1/paradise/evacuation/compare", { include_fire_hazard: includeHazard })
       .then((data) => {
-        if (!active) return;
+        if (!current) return;
         setComparison(data);
         if (!data.scenarios.some((scenario) => scenario.id === selectedId)) {
           setSelectedId(data.scenarios[0]?.id || "late");
         }
       })
-      .catch((cause) => { if (active) setError(cause.message); });
-    return () => { active = false; };
-  }, [includeHazard]);
+      .catch((cause) => { if (current) setError(cause.message); });
+    return () => { current = false; };
+  }, [active, includeHazard]);
 
   const selectedScenario = comparison?.scenarios.find((scenario) => scenario.id === selectedId) || comparison?.scenarios[0];
 
   useEffect(() => {
-    if (!selectedScenario) return undefined;
-    let active = true;
+    if (!active || !selectedScenario) return undefined;
+    let current = true;
     setDetailLoading(true);
     post("/api/v1/paradise/evacuation/simulate", {
       order_at_utc: selectedScenario.order_at_utc,
       include_fire_hazard: includeHazard,
     })
-      .then((data) => { if (active) setDetail(data); })
-      .catch((cause) => { if (active) setError(cause.message); })
-      .finally(() => { if (active) setDetailLoading(false); });
-    return () => { active = false; };
-  }, [selectedScenario?.order_at_utc, includeHazard]);
+      .then((data) => { if (current) setDetail(data); })
+      .catch((cause) => { if (current) setError(cause.message); })
+      .finally(() => { if (current) setDetailLoading(false); });
+    return () => { current = false; };
+  }, [active, selectedScenario?.order_at_utc, includeHazard]);
 
   const resourceAt = useMemo(
     () => comparison?.scenarios.find((scenario) => scenario.id === "late")?.order_at_utc || "2018-11-08T19:50:00Z",
@@ -179,19 +183,19 @@ export default function EvacuationPanel() {
   );
 
   useEffect(() => {
-    if (!resourceAt) return undefined;
-    let active = true;
+    if (!active || !resourceAt) return undefined;
+    let current = true;
     setResourceLoading(true);
     post("/api/v1/paradise/resources/simulate", {
       at_utc: resourceAt,
       lead_minutes: 120,
       strategy,
     })
-      .then((data) => { if (active) setResources(data); })
-      .catch((cause) => { if (active) setError(cause.message); })
-      .finally(() => { if (active) setResourceLoading(false); });
-    return () => { active = false; };
-  }, [resourceAt, strategy]);
+      .then((data) => { if (current) setResources(data); })
+      .catch((cause) => { if (current) setError(cause.message); })
+      .finally(() => { if (current) setResourceLoading(false); });
+    return () => { current = false; };
+  }, [active, resourceAt, strategy]);
 
   if (error) {
     return <section className="evac panel" aria-label="Evacuation and resources"><p className="prError" role="alert">{error}</p></section>;
@@ -213,6 +217,12 @@ export default function EvacuationPanel() {
       <span className="prStatusChip scenario">Scenario only</span>
     </div>
 
+    <nav className="subNav compact" aria-label="Response simulation views">{[["timing", "Evacuation timing"], ["corridors", "Evacuation corridors"], ["resources", "Firefighting resources"]].map(([id, label]) => <button key={id} className={responsePane === id ? "active" : ""} aria-pressed={responsePane === id} onClick={() => setResponsePane(id)}>{label}</button>)}</nav>
+    <div className="contextHelp" role="group" aria-label="Response explanations">
+      {responsePane === "timing" && <GuideLink chapter="response" section="evacuation-timing">Evacuation timing rules</GuideLink>}
+      {responsePane === "corridors" && <GuideLink chapter="response" section="evacuation-corridors">How corridors are modelled</GuideLink>}
+      {responsePane === "resources" && <GuideLink chapter="response" section="firefighting-resources">Allocation rules</GuideLink>}
+    </div>
     <div className="evacControls">
       <label className="evacToggle"><input type="checkbox" checked={includeHazard} onChange={(event) => setIncludeHazard(event.target.checked)} /> Include predicted fire hazard</label>
       <span className="evacControlNote">{includeHazard ? "Fire arrival is the uncalibrated forecast at each order time. Early order times have no FIRMS forecast; their hazard is not modelled, which is not evidence of safety." : "Hazard is disabled for a pure order-time and capacity comparison. This is not evidence of safety."}</span>
@@ -225,7 +235,7 @@ export default function EvacuationPanel() {
       </button>)}
     </div>
 
-    <div className="evacGrid">
+    <div className="evacGrid" hidden={responsePane !== "timing"}>
       <div className="evacCard">
         <div className="evacCardTop"><div><p className="eyebrow">ORDER-TIME COMPARISON</p><strong>Order time changes scenario outputs</strong></div><span className="prStatusChip muted">same seed</span></div>
         <div className="evacTableWrap">
@@ -276,9 +286,9 @@ export default function EvacuationPanel() {
       </div>
     </div>
 
-    <ResponseFlowMap detail={detail} resources={resources} />
+    <div hidden={responsePane !== "corridors"}><ResponseFlowMap detail={detail} resources={resources} /></div>
 
-    <div className="evacResources">
+    <div className="evacResources" hidden={responsePane !== "resources"}>
       <div className="evacCardTop"><div><p className="eyebrow">SIMULATED FIREFIGHTING RESOURCES</p><strong>Exposure-weighted vs nearest-first</strong></div><span className="prStatusChip scenario">Scenario only</span></div>
       <div className="evacStrategySwitch" role="group" aria-label="Resource allocation strategy">
         {[["exposure_weighted", "Exposure-weighted"], ["nearest_first", "Nearest-first"], ["none", "No action baseline"]].map(([id, label]) => <button key={id} className={strategy === id ? "active" : ""} onClick={() => setStrategy(id)}>{label}</button>)}
