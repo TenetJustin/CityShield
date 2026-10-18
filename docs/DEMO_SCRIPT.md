@@ -5,7 +5,7 @@
 “When new fire and weather data arrive, CityShield detects abnormal escalation, predicts which populated areas may be threatened next, and recommends time-sensitive actions with human oversight.” Run **Live update**. Follow FIRMS + NOAA through the Paradise grid, 30/60/120-minute outlook and decision queue. Show the source timestamp, inference latency, Git commit and `s390x` runtime evidence. If the result abstains because Paradise has no mapped detections, explain that this is required safety behavior rather than a failed demo.
 
 Begin on the landing page. Read the current recommendation first, point to the
-live Paradise map, then use **Get started** to enter the evidence and decision
+live Paradise map, then use **Open workspace** to enter the evidence and decision
 workflow. **Preview 2018 spread** is explicitly historical and must not be
 described as a current Paradise incident.
 

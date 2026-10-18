@@ -272,8 +272,7 @@ function App() {
       : `${actions.length} areas need a coordination decision`;
 
   return <main className="appShell">
-    <LandingHero />
-    <header className="topbar"><div className="brand"><FireShieldMark /><div><strong>CityShield</strong><small>WILDFIRE DECISION STUDIO</small></div></div><span className="modeBadge">PARADISE 2018 · ADVISORY ONLY</span></header>
+    <header className="topbar"><div className="brand"><FireShieldMark /><div><strong>CityShield</strong><small>WILDFIRE DECISION STUDIO</small></div></div><div className="workspaceNav"><a href="/">Home</a><span className="modeBadge">PARADISE 2018 · ADVISORY ONLY</span></div></header>
 
     <section className="intro"><div><p className="eyebrow">PARADISE, CALIFORNIA · 2018 HISTORICAL REPLAY · IBM LINUXONE</p><h1>Replay the Camp Fire.<br /><em>Test the forecast.</em></h1></div><div className="introAside"><span className="pulseDot" />Camp Fire 2018 replay · 500 m Paradise grid<small>Real FIRMS observations + NIST time windows · research prototype</small></div></section>
     {error && <div className="error" role="alert">{error}</div>}
@@ -314,4 +313,16 @@ function App() {
   </main>;
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+function Root() {
+  const workspace = window.location.pathname === "/workspace" || window.location.pathname === "/workspace/";
+  useEffect(() => {
+    document.title = workspace
+      ? "CityShield · Decision Workspace"
+      : "CityShield · Real-Time Wildfire Decisions";
+  }, [workspace]);
+  return workspace
+    ? <App />
+    : <main className="appShell homeShell"><LandingHero /></main>;
+}
+
+createRoot(document.getElementById("root")).render(<Root />);

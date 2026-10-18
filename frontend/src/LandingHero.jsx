@@ -114,7 +114,7 @@ export default function LandingHero() {
   const boundary = geography?.features?.[0];
 
   function getStarted() {
-    document.getElementById("live-decision-loop")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.location.assign("/workspace");
   }
 
   return <section className="landingHero" aria-label="CityShield live decision landing page">
@@ -125,7 +125,7 @@ export default function LandingHero() {
       <p className="landingKicker">REAL-TIME AI FOR CRITICAL DECISIONS</p>
       <h1>See what is changing.<br /><span>Decide what happens next.</span></h1>
       <p className="landingLead">{copy.headline} {copy.detail}</p>
-      <div className="landingActions"><button className="landingPrimary" onClick={getStarted}>Get started <span>↗</span></button><button className={historicalPreview ? "landingSecondary active" : "landingSecondary"} onClick={() => setHistoricalPreview((value) => !value)}>{historicalPreview ? "Return to live map" : "Preview 2018 spread"}</button></div>
+      <div className="landingActions"><button className="landingPrimary" onClick={getStarted}>Open workspace <span>↗</span></button><button className={historicalPreview ? "landingSecondary active" : "landingSecondary"} onClick={() => setHistoricalPreview((value) => !value)}>{historicalPreview ? "Return to live map" : "Preview 2018 spread"}</button></div>
       <div className="landingSourceRow"><span><i className={nowcast?.sources?.["nasa-firms"]?.status === "ok" ? "ok" : "warn"} />NASA FIRMS</span><span><i className={nowcast?.sources?.["noaa-nws"]?.status === "ok" ? "ok" : "warn"} />NOAA WEATHER</span><span>UPDATED {timeLabel(nowcast?.telemetry?.source_snapshot_at)}</span></div>
     </div>
 

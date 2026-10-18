@@ -9,7 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from .adapters import source_registry
@@ -594,4 +594,9 @@ async def stream_demo(delay_ms: int = Query(default=250, ge=0, le=5000)):
 
 # The LinuxONE image includes the built console; API routes above take priority.
 if frontend_dist.is_dir():
+    @app.get("/workspace", include_in_schema=False)
+    @app.get("/workspace/", include_in_schema=False)
+    def workspace_console():
+        return FileResponse(frontend_dist / "index.html")
+
     app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="console")
