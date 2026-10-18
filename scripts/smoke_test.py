@@ -35,5 +35,9 @@ scenario = request(
 assert scenario["simulation_run_id"]
 audit = request("/api/v1/audits")
 assert audit["verification"]["valid"] is True
+nowcast = request("/api/v1/paradise/nowcast")
+assert nowcast["status"] in {"advisory_ready", "abstained_no_observations", "input_incomplete"}
+assert nowcast["telemetry"]["deployment_target"] == "IBM LinuxONE"
+assert nowcast["actions"]
 print("CityShield smoke test passed")
 

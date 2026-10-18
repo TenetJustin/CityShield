@@ -14,6 +14,7 @@ Interactive OpenAPI documentation is available at `/docs` while the backend is r
 | `GET /api/v1/paradise/data-quality` | Machine-readable data-quality report |
 | `GET /api/v1/paradise/replay` | Real FIRMS/NIST replay frames and source status |
 | `GET /api/v1/paradise/replay/frame?at=...` | Latest real frame at or before a timestamp |
+| `GET /api/v1/paradise/nowcast?refresh=true` | Live FIRMS + NOAA to grid, 30/60/120 forecast and human decision queue |
 | `GET /api/v1/paradise/forecast?at=...&lead_minutes=...` | Deterministic time-forward grid forecast |
 | `GET /api/v1/paradise/evaluation` | Strict time-forward evaluation package and evidence status |
 | `GET /api/v1/paradise/evaluation/summary` | Compact evaluation summary |
@@ -71,4 +72,19 @@ trapped count in that state is not evidence of safety.
 - `409`: stale run identity, invalid lifecycle transition, or missing baseline forecast.
 - `422`: schema, time, range, cell or scenario validation failure.
 - Upstream source failures are reported by adapters and must not silently fall back to data labeled live.
+
+## Live decision loop
+
+`/api/v1/paradise/nowcast` is the minimal real-time loop for the competition
+theme. It maps current NASA FIRMS detections to the frozen Paradise 500 m grid,
+uses the current NOAA hourly forecast as the declared weather input, runs the
+versioned 24-member ensemble at 30, 60 and 120 minutes, calculates mapped
+population exposure, and returns ranked advisory actions with mandatory human
+review. The response includes source timestamps, inference latency, model/grid
+versions, Git commit, runtime architecture, run ID and audit hash.
+
+The endpoint returns `abstained_no_observations` when no current detection maps
+to the grid and `input_incomplete` when a required live source is unavailable.
+Neither state silently substitutes the historical replay or claims that the
+area is safe.
 

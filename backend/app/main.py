@@ -29,7 +29,14 @@ from .paradise import (
     live_snapshot as paradise_live_snapshot,
     terrain_samples as paradise_terrain_samples,
 )
-from . import paradise_eval, paradise_forecast, paradise_grid, paradise_replay, paradise_response
+from . import (
+    paradise_eval,
+    paradise_forecast,
+    paradise_grid,
+    paradise_nowcast,
+    paradise_replay,
+    paradise_response,
+)
 from .rsi import ControlledRSI
 from .schemas import (
     DecisionOutcome,
@@ -65,11 +72,13 @@ metrics = {
     "decisions_created": 0,
     "rsi_candidates_created": 0,
     "last_forecast_latency_ms": None,
+    "live_nowcasts_created": 0,
+    "last_live_nowcast_latency_ms": None,
 }
 
 app = FastAPI(
     title="CityShield",
-    version="0.2.0",
+    version="0.3.0",
     description="LinuxONE-ready real-time wildfire world-model research prototype",
 )
 app.add_middleware(
@@ -319,6 +328,28 @@ def paradise_terrain_data():
 @app.get("/api/v1/paradise/live")
 async def paradise_live_data(refresh: bool = False):
     return await paradise_live_snapshot(force=refresh)
+
+
+@app.get("/api/v1/paradise/nowcast")
+async def paradise_live_nowcast(refresh: bool = False):
+    result = await paradise_nowcast.build_nowcast(force=refresh)
+    metrics["live_nowcasts_created"] += 1
+    metrics["last_live_nowcast_latency_ms"] = result["telemetry"]["inference_latency_ms"]
+    record = _audit(
+        "live_nowcast_created",
+        {
+            "run_id": result["run_id"],
+            "status": result["status"],
+            "mapped_seed_cells": len(result["observation"]["mapped_seed_cells"]),
+            "forecast_ids": {
+                horizon: forecast.get("forecast_id")
+                for horizon, forecast in result["forecasts"].items()
+            },
+            "decision_status": result["decision_status"],
+        },
+    )
+    result["audit_hash"] = record["hash"]
+    return result
 
 
 @app.get("/api/v1/sources")

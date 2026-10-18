@@ -17,6 +17,7 @@ It implements a transparent **Detect → Decide → Respond** loop:
 
 ## Current status
 
+- The **live decision loop** now connects NASA FIRMS and NOAA hourly forecasts to the shared grid, a versioned 24-member ensemble at 30/60/120 minutes, mapped population exposure, ranked advisory actions and mandatory human review. It reports source freshness, inference latency, model/grid/Git identity and the LinuxONE runtime architecture. If required inputs are missing or no hotspot maps to the grid, it abstains visibly instead of borrowing the historical replay.
 - A frozen **Paradise 500 m grid** (841 cells, 3 km town buffer) is the single spatial contract for FIRMS hotspots, ACS population exposure, Census roads, terrain and the backend model. See [Paradise replay data](docs/PARADISE_REPLAY.md).
 - The **NASA FIRMS Camp Fire package** contains 2,017 VIIRS detections in 9 snapshots from 2018-11-08 11:50 PT to 2018-11-09 14:01 PT. It is an observation-point layer, not a perimeter.
 - The **NIST Camp Fire timeline** has 4 continuous windows with re-verified source hashes. The map symbols are raster-embedded and remain **undigitized**, so NIST is a temporal constraint only and cannot be used for spatial scoring.
@@ -63,7 +64,8 @@ VITE_API_URL=http://127.0.0.1:8001 npm run dev -- --host 127.0.0.1 --port 5174
 Then open **http://127.0.0.1:5174/**.
 
 The Paradise public-data panel is available without a NASA key. The API paths
-`/api/v1/paradise/geography` and `/api/v1/paradise/live` expose source details.
+`/api/v1/paradise/geography`, `/api/v1/paradise/live` and
+`/api/v1/paradise/nowcast` expose source details and the live decision loop.
 See [Paradise sources and acceptance gaps](data/paradise/SOURCES.md). The live
 panel is not a validated fire prediction or official emergency service.
 
@@ -88,6 +90,7 @@ curl -X POST http://localhost:8000/api/v1/demo/reset
 curl -X POST http://localhost:8000/api/v1/demo/replay
 curl http://localhost:8000/api/v1/demo/incident
 curl http://localhost:8000/api/v1/delivery/readiness
+curl 'http://localhost:8000/api/v1/paradise/nowcast?refresh=true'
 curl http://localhost:8000/api/v1/predict
 curl -X POST http://localhost:8000/api/v1/decisions/recommend
 ```

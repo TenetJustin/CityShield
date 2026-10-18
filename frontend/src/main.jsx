@@ -5,6 +5,7 @@ import ParadiseData from "./ParadiseData.jsx";
 import DataStatusPanel from "./DataStatusPanel.jsx";
 import ParadiseReplay from "./ParadiseReplay.jsx";
 import FireShieldMark from "./brand/FireShieldMark.jsx";
+import LiveDecisionLoop from "./LiveDecisionLoop.jsx";
 import "./styles.css";
 
 const WildfireScene = lazy(() => import("./WildfireScene.jsx"));
@@ -274,6 +275,8 @@ function App() {
 
     <section className="intro"><div><p className="eyebrow">PARADISE, CALIFORNIA · 2018 HISTORICAL REPLAY · IBM LINUXONE</p><h1>Replay the Camp Fire.<br /><em>Test the forecast.</em></h1></div><div className="introAside"><span className="pulseDot" />Camp Fire 2018 replay · 500 m Paradise grid<small>Real FIRMS observations + NIST time windows · research prototype</small></div></section>
     {error && <div className="error" role="alert">{error}</div>}
+
+    <LiveDecisionLoop />
 
     <ParadiseData />
 

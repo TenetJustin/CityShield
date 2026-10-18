@@ -44,6 +44,7 @@ run_production() {
   podman run -d --name cityshield-api --restart=unless-stopped \
     -p 127.0.0.1:8000:8000 \
     -v "cityshield-runtime:$runtime_path:Z" \
+    -e "CITYSHIELD_GIT_COMMIT=$commit" \
     "${env_args[@]}" \
     "$1"
 }
@@ -58,6 +59,7 @@ trap cleanup EXIT
 podman run -d --name cityshield-candidate \
   -p 127.0.0.1:18001:8000 \
   -v "cityshield-validation:$runtime_path:Z" \
+  -e "CITYSHIELD_GIT_COMMIT=$commit" \
   "${env_args[@]}" \
   "$image"
 wait_for_health 18001

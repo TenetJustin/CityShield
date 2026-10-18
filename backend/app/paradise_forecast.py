@@ -75,8 +75,13 @@ def _downwind_unit_vector(wind_from_deg: float) -> tuple[float, float]:
     return math.sin(bearing), math.cos(bearing)
 
 
-def _weather(parameters: dict[str, Any], member: int, rng: random.Random) -> dict[str, float]:
-    base = parameters["weather_assumption"]
+def _weather(
+    parameters: dict[str, Any],
+    member: int,
+    rng: random.Random,
+    base_weather: dict[str, Any] | None = None,
+) -> dict[str, float]:
+    base = base_weather or parameters["weather_assumption"]
     if member == 0:
         return {
             "wind_from_deg": float(base["wind_from_deg"]),
@@ -121,7 +126,14 @@ def _member_edge_probabilities(weather: dict[str, float], multiplier: float) -> 
     return result
 
 
-def _forecast_id(at_utc: str, lead_minutes: int, seeds: list[str], scenario: dict[str, Any], threshold: float) -> str:
+def _forecast_id(
+    at_utc: str,
+    lead_minutes: int,
+    seeds: list[str],
+    scenario: dict[str, Any],
+    threshold: float,
+    weather: dict[str, Any] | None = None,
+) -> str:
     payload = {
         "data_version": paradise_grid.grid()["data_version"],
         "model_version": config()["model_version"],
@@ -130,6 +142,7 @@ def _forecast_id(at_utc: str, lead_minutes: int, seeds: list[str], scenario: dic
         "seeds": seeds,
         "scenario": scenario,
         "threshold": threshold,
+        "weather": weather,
         "parameters": config(),
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()[:16]
@@ -141,8 +154,17 @@ def run_forecast(
     *,
     scenario: dict[str, Any] | None = None,
     threshold: float | None = None,
+    seed_cells: list[str] | None = None,
+    weather: dict[str, Any] | None = None,
+    source_mode: str = "historical_replay",
 ) -> dict[str, Any]:
-    """Forecast from observations available at ``at`` only, for one lead time."""
+    """Forecast from observations available at ``at`` only, for one lead time.
+
+    Historical replay calls leave ``seed_cells`` and ``weather`` unset. The
+    live nowcast supplies grid-mapped FIRMS cells and the current NOAA hourly
+    forecast explicitly, so real-time inputs never silently fall back to the
+    2018 replay.
+    """
     if lead_minutes < config()["step_minutes"] or lead_minutes > config()["max_lead_minutes"]:
         raise ValueError(
             f"lead_minutes must be between {config()['step_minutes']} and {config()['max_lead_minutes']}"
@@ -161,22 +183,34 @@ def run_forecast(
     }
     threshold = float(threshold if threshold is not None else config()["threshold"])
     at_norm = paradise_replay.utc(at).isoformat()
-    seeds = paradise_replay.seed_cells_at(at_norm)
+    seeds = sorted(set(seed_cells)) if seed_cells is not None else paradise_replay.seed_cells_at(at_norm)
+    unknown_seeds = sorted(set(seeds) - set(model_arrays()[1]))
+    if unknown_seeds:
+        raise ValueError(f"unknown seed cells: {unknown_seeds[:5]}")
     if not seeds:
         return {
             "status": "no_observations",
-            "reason": "No FIRMS detections at or before this time. The model does not fabricate a fire.",
+            "reason": "No mapped FIRMS detections are available for this issue time. The model abstains and does not fabricate a fire.",
             "issued_at_utc": at_norm,
             "issued_at_local": paradise_replay.local_iso(at_norm),
             "lead_minutes": lead_minutes,
             "data_version": paradise_grid.grid()["data_version"],
             "model_version": config()["model_version"],
+            "source_mode": source_mode,
             "seeds": [],
             "cells": [],
             "summary": {"seed_cells": 0, "predicted_cells": 0},
         }
     cache_key = json.dumps(
-        {"at": at_norm, "lead": lead_minutes, "seeds": seeds, "scenario": scenario, "threshold": threshold},
+        {
+            "at": at_norm,
+            "lead": lead_minutes,
+            "seeds": seeds,
+            "scenario": scenario,
+            "threshold": threshold,
+            "weather": weather,
+            "source_mode": source_mode,
+        },
         sort_keys=True,
     )
     if cache_key in _cache:
@@ -186,7 +220,7 @@ def run_forecast(
     seed_positions = [index[cell_id] for cell_id in seeds if cell_id in index]
     parameters = config()
     member_count = int(parameters["members"])
-    base_seed = int(_forecast_id(at_norm, lead_minutes, seeds, scenario, threshold), 16)
+    base_seed = int(_forecast_id(at_norm, lead_minutes, seeds, scenario, threshold, weather), 16)
     step_minutes = int(parameters["step_minutes"])
     steps = max(1, math.ceil(lead_minutes / step_minutes))
     threshold = max(0.05, min(0.95, threshold))
@@ -195,12 +229,12 @@ def run_forecast(
     arrivals: list[list[int]] = [[] for _ in cells]
     for member in range(member_count):
         rng = random.Random(base_seed + member * 1_000_003)
-        weather = _weather(parameters, member, rng)
-        weather["wind_speed_m_s"] = max(0.0, weather["wind_speed_m_s"] * scenario["wind_speed_multiplier"])
-        weather["wind_from_deg"] = (weather["wind_from_deg"] + scenario["wind_direction_delta_deg"]) % 360
+        member_weather = _weather(parameters, member, rng, weather)
+        member_weather["wind_speed_m_s"] = max(0.0, member_weather["wind_speed_m_s"] * scenario["wind_speed_multiplier"])
+        member_weather["wind_from_deg"] = (member_weather["wind_from_deg"] + scenario["wind_direction_delta_deg"]) % 360
         multiplier = rng.lognormvariate(0.0, parameters["spread"]["rate_sigma"])
         multiplier *= max(0.0, 1.0 - scenario["suppression_effectiveness"])
-        edge_probabilities = _member_edge_probabilities(weather, multiplier)
+        edge_probabilities = _member_edge_probabilities(member_weather, multiplier)
         burning = [False] * len(cells)
         arrival = [None] * len(cells)
         for position in seed_positions:
@@ -252,7 +286,7 @@ def run_forecast(
     result_cells.sort(key=lambda item: (-item["probability"], item["cell_id"]))
     result = {
         "status": "predicted",
-        "forecast_id": _forecast_id(at_norm, lead_minutes, seeds, scenario, threshold),
+        "forecast_id": _forecast_id(at_norm, lead_minutes, seeds, scenario, threshold, weather),
         "issued_at_utc": at_norm,
         "issued_at_local": paradise_replay.local_iso(at_norm),
         "valid_at_utc": (paradise_replay.utc(at_norm) + timedelta(minutes=lead_minutes)).isoformat(),
@@ -260,11 +294,12 @@ def run_forecast(
         "data_version": paradise_grid.grid()["data_version"],
         "grid_version": paradise_grid.grid()["grid_version"],
         "model_version": config()["model_version"],
+        "source_mode": source_mode,
         "threshold": threshold,
         "scenario": scenario,
         "weather_assumption": {
-            **parameters["weather_assumption"],
-            "ensemble_note": "Member 0 is the stated assumption; other members sample wind, humidity and temperature uncertainty.",
+            **(weather or parameters["weather_assumption"]),
+            "ensemble_note": "Member 0 uses the stated input; other members sample wind, humidity and temperature uncertainty.",
         },
         "seeds": seeds,
         "cells": result_cells,
@@ -280,7 +315,11 @@ def run_forecast(
             "threshold": threshold,
         },
         "assumptions": [
-            "Weather is a fixed scenario assumption, not a historical station observation.",
+            (
+                "Weather is the current NOAA hourly forecast for Paradise, not a ground-station observation."
+                if weather
+                else "Weather is a fixed scenario assumption, not a historical station observation."
+            ),
             "Fuel is a declared default because no LANDFIRE layer is bundled.",
             "Terrain is a coarse 7x7 interpolation, not a modeling DEM.",
             "No suppression, water availability, ember transport or structure-to-structure spread is modelled.",

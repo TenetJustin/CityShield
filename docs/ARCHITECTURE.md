@@ -4,11 +4,11 @@ CityShield preserves the reusable flow of `cityos-flood` while replacing flood-s
 
 ```mermaid
 flowchart TB
-  S[External streams: FIRMS, weather, perimeters, roads] --> I
+  S[Near-real-time streams: FIRMS + NOAA] --> I
 
   subgraph L[IBM LinuxONE]
     subgraph RT[Real-time critical-decision loop]
-      I[Ingest + validate + align] --> O[Evidence snapshot]
+      I[Ingest + validate + map to Paradise grid] --> O[Evidence snapshot]
       O --> D[DETECT: assimilate and identify change]
       D --> W[Wildfire world state]
       W --> P[PREDICT: 30/60/120 min ensemble]
@@ -39,6 +39,12 @@ flowchart TB
 ```
 
 The real-time and RSI paths are deliberately separated. Detect/Decide/Respond stays deterministic for a frozen evidence snapshot; RSI only consumes completed-event outcomes and may propose a versioned shadow candidate.
+
+The implemented minimum live path is `FIRMS + NOAA → Paradise 500 m grid →
+24-member 30/60/120-minute ensemble → population exposure → ranked advisory
+actions → human review → audit hash`. A missing required feed returns
+`input_incomplete`; zero mapped detections returns `abstained_no_observations`.
+The system never fills either state with the 2018 replay.
 
 ## World-model contract
 
@@ -71,7 +77,12 @@ They do not enter the operational decision chain and do not create dispatches.
 
 ## Delivery boundary
 
-The live-data path is an enhancement rather than a single point of failure. The competition path uses the same contracts with a versioned offline incident package. The interface labels live, cached, historical and synthetic modes explicitly; source failure can degrade to replay but cannot silently change provenance.
+The live-data path is the primary competition flow. The historical Camp Fire
+package provides a reproducible demonstration and time-forward evaluation when
+external feeds are unavailable. The interface labels live, cached, historical
+and synthetic modes explicitly; source failure may lead the presenter to the
+separate replay, but the live endpoint itself abstains and never silently
+changes provenance.
 
 ## Remaining city-specific boundary
 
