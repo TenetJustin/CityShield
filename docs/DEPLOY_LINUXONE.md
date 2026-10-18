@@ -12,6 +12,18 @@ ssh -i ~/.ssh/cityshield_linuxone -o IdentitiesOnly=yes linux1@<VM_IP>
 
 Enter the **private key passphrase** at the SSH prompt. The private key is encrypted; noninteractive SSH fails without this passphrase. Never paste the passphrase into this repository or share the private key with teammates.
 
+Store runtime-only secrets outside the repository. The deployment script reads
+`$HOME/.config/cityshield/runtime.env` when it exists:
+
+```bash
+mkdir -p ~/.config/cityshield
+chmod 700 ~/.config/cityshield
+printf 'FIRMS_MAP_KEY=%s\n' 'YOUR_KEY' > ~/.config/cityshield/runtime.env
+chmod 600 ~/.config/cityshield/runtime.env
+```
+
+Never commit this file or print the key in deployment logs.
+
 On the VM, use the latest `main` commit and run the deployment script:
 
 ```bash

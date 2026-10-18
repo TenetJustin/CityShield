@@ -11,6 +11,11 @@ fi
 commit=$(git rev-parse --short HEAD)
 image="localhost/cityshield:$commit"
 runtime_path=/opt/app-root/src/backend/data/runtime
+runtime_env_file=${CITYSHIELD_ENV_FILE:-"$HOME/.config/cityshield/runtime.env"}
+env_args=()
+if [[ -f $runtime_env_file ]]; then
+  env_args=(--env-file "$runtime_env_file")
+fi
 
 wait_for_health() {
   local port=$1
@@ -39,6 +44,7 @@ run_production() {
   podman run -d --name cityshield-api --restart=unless-stopped \
     -p 127.0.0.1:8000:8000 \
     -v "cityshield-runtime:$runtime_path:Z" \
+    "${env_args[@]}" \
     "$1"
 }
 
@@ -52,6 +58,7 @@ trap cleanup EXIT
 podman run -d --name cityshield-candidate \
   -p 127.0.0.1:18001:8000 \
   -v "cityshield-validation:$runtime_path:Z" \
+  "${env_args[@]}" \
   "$image"
 wait_for_health 18001
 curl -fsS http://127.0.0.1:18001/ >/dev/null
