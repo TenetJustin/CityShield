@@ -2,5 +2,5 @@ fastapi==0.143.2
 uvicorn[standard]>=0.30.6,<1
 pydantic>=2.13.5,<3
 httpx>=0.28.1,<1
-pytest>=9.1.1,<10
+pytest>=9.2.0,<10
 
